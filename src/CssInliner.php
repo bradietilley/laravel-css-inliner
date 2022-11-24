@@ -28,8 +28,21 @@ class CssInliner
     /** Should CssInliner listen to email events and automatically conver them to inline CSS? */
     protected bool $emailListenerEnabled = true;
 
+    /** Should CssInliner strip style and link elements from the given HTML after */
+    protected bool $cssRemovalFromHtmlContentEnabled = false;
+
     /** Callback interceptors for reading CSS files */
     protected array $interceptCssFiles = [];
+
+    /**
+     * Create a new CssInliner instance
+     *
+     * For Laravel: use the facade or `app(CssInliner::class)`
+     */
+    public static function create(): self
+    {
+        return new self();
+    }
 
     /**
      * Add a CSS file to every email/HTML that gets converted
@@ -116,6 +129,34 @@ class CssInliner
     public function disableCssExtractionFromHtmlContent(): self
     {
         $this->cssFromHtmlContentEnabled = true;
+
+        return $this;
+    }
+
+    /**
+     * Should CssInliner strip style and link elements from the given HTML after
+     */
+    public function cssRemovalFromHtmlContentEnabled(): bool
+    {
+        return $this->cssRemovalFromHtmlContentEnabled;
+    }
+
+    /**
+     * Remove <style> and <link> elements from within the given HTML after conversion
+     */
+    public function enableCssRemovalFromHtmlContent(): self
+    {
+        $this->cssRemovalFromHtmlContentEnabled = true;
+
+        return $this;
+    }
+
+    /**
+     * Don't remove <style> and <link> elements from within the given HTML after conversion
+     */
+    public function disableCssRemovalFromHtmlContent(): self
+    {
+        $this->cssRemovalFromHtmlContentEnabled = true;
 
         return $this;
     }
@@ -214,7 +255,7 @@ class CssInliner
         }
 
         $email->html(
-            self::convert($email->getHtmlBody()),
+            $this->convert($email->getHtmlBody()),
         );
 
         Event::dispatch(new PostEmailCssInlineEvent($email, $this));
@@ -257,8 +298,37 @@ class CssInliner
      */
     public function parseCssFromHtml(string $html): string
     {
-        // TODO
-        return '';
+        $raw = [];
+
+        $html = preg_replace_callback(
+            pattern: '/<style[^>]*>(.+?)<\/style>/s',
+            callback: function (array $matches) use (&$raw) {
+                $raw[] = $matches[1];
+
+                return $this->cssRemovalFromHtmlContentEnabled()
+                    ? ''
+                    : $matches[0];
+            },
+            subject: $html,
+        );
+
+        $html = preg_replace_callback(
+            pattern: [
+                '/<link[^>]+href="([^"]+)"[^>]+rel="stylesheet"[^>]*>/',
+                '/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"[^>]*>/',
+            ],
+            callback: function (array $matches) use (&$raw) {
+                $file = $matches[1];
+                $raw[] = $this->readCssFileAsString($file);
+
+                return $this->cssRemovalFromHtmlContentEnabled()
+                    ? ''
+                    : $matches[0];
+            },
+            subject: $html,
+        );
+
+        return $html;
     }
 
     public function beforeConvertingEmail(callable $callback): self
@@ -286,6 +356,11 @@ class CssInliner
     {
         Event::listen(PostCssInlineEvent::class, $callback);
 
+        return $this;
+    }
+
+    public function instance(): self
+    {
         return $this;
     }
 }

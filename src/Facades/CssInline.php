@@ -20,6 +20,7 @@ use Symfony\Component\Mime\Email;
  * @method static Email convertEmail(string Email)
  * @method static string convert(string $html)
  * @method static string parseCssFromHtml(string $html)
+ * @method static CssInliner instance()
  */
 class CssInline extends Facade
 {
