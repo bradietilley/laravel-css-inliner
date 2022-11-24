@@ -1,0 +1,58 @@
+{
+    "name": "laravel-css-inliner/css-inliner",
+    "type": "library",
+    "description": ":package_description",
+    "license": "MIT",
+    "require": {
+        "php": "^8.1",
+        "illuminate/contracts": "^9.34",
+        "illuminate/support": "^9.34",
+        "symfony/mime": "^6.1",
+        "tijsverkoyen/css-to-inline-styles": "^2.2"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "pestphp/pest": "^1.21.3",
+        "phpstan/phpstan": "^1.8.1",
+        "symfony/var-dumper": "^5.4.9 || ^6.0.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "LaravelCssInliner\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LaravelCssInliner\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "lint": "pint --ansi",
+        "test:lint": "pint --test --ansi",
+        "test:types": "phpstan analyse --ansi --memory-limit=-1",
+        "test:unit": "pest --colors=always",
+        "test": [
+            "@test:lint",
+            "@test:types",
+            "@test:unit"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaravelCssInliner\\LaravelCssInlinerServiceProvider"
+            ],
+            "aliases": {
+                "CssInline": "LaravelCssInliner\\Facades\\CssInline"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
