@@ -31,6 +31,35 @@ it('can convert css classes to inline styles using CSS file', function () {
     expect($actual)->sameHtml($expect);
 });
 
+it('can convert css classes to inline styles using embedded style element', function () {
+    $css = '.example { text-decoration: underline; }';
+    $html = '<style>' . $css . '</style> This is a <span class="example">test</span>';
+
+    $expect = 'This is a <span class="example" style="text-decoration: underline;">test</span>';
+
+    $actual = CssInliner::create()
+        ->enableCssExtractionFromHtmlContent()
+        ->disableCssRemovalFromHtmlContent()
+        ->convert($html);
+
+    expect($actual)->sameHtml($expect);
+});
+
+it('can convert css classes to inline styles using embedded link element', function () {
+    $css = '.example { font-style: italic; }';
+    $path = writeTempFile('mail.css', $css);
+    $html = '<link rel="stylesheet" href="' . $path . '"> This is a <span class="example">test</span>';
+
+    $expect = 'This is a <span class="example" style="font-style: italic;">test</span>';
+
+    $actual = CssInliner::create()
+        ->enableCssExtractionFromHtmlContent()
+        ->disableCssRemovalFromHtmlContent()
+        ->convert($html);
+
+    expect($actual)->sameHtml($expect);
+});
+
 it('can convert css classes to inline styles using multiple sources', function () {
     $file1 = writeTempFile('example1.css', '.example { font-weight: bold; }');
     $file2 = writeTempFile('example2.css', '.example { font-size: 12px; }');

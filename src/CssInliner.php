@@ -294,9 +294,9 @@ class CssInliner
     }
 
     /**
-     * Extract CSS from the given HTML
+     * Extract and return CSS from the given HTML
      */
-    public function parseCssFromHtml(string $html): string
+    public function parseCssFromHtml(string &$html): string
     {
         $raw = [];
 
@@ -328,7 +328,7 @@ class CssInliner
             subject: $html,
         );
 
-        return $html;
+        return implode("\n\n", $raw);
     }
 
     public function beforeConvertingEmail(callable $callback): self
