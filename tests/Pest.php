@@ -17,6 +17,26 @@ function cleanHtml(string $html): string
     );
 }
 
+function getTempFilePath(string $name): string
+{
+    return __DIR__ . '/temp/' . $name;
+}
+
+function writeTempFile(string $name, string $content): string
+{
+    file_put_contents($path = getTempFilePath($name), $content);
+
+    return $path;
+}
+
+afterAll(function () {
+    foreach (scandir(__DIR__ . '/temp') as $file) {
+        if ($file[0] !== '.') {
+            unlink(__DIR__ . '/temp/' . $file);
+        }
+    }
+});
+
 expect()->extend('sameHtml', function (string $html) {
     expect(cleanHtml($this->value))->toBe(cleanHtml($html));
 });
