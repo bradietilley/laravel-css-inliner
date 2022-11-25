@@ -17,7 +17,7 @@ use LaravelCssInliner\CssInliner;
 
 $inliner = app(CssInliner::class);
 
-$inliner->addCss(resource_path('css/email.css'));
+$inliner->addCssPath(resource_path('css/email.css'));
 $inliner->addCssRaw('.text-green-500 { color: #0f0; }');
 
 # Convert your own HTML/CSS
@@ -31,7 +31,7 @@ Using the facade:
 ```php
 use LaravelCssInliner\Facades\CssInline;
 
-CssInline::addCss(resource_path('css/email.css'));
+CssInline::addCssPath(resource_path('css/email.css'));
 CssInline::addCssRaw('.text-green-500 { color: #00ff00; }');
 
 # Convert your own HTML/CSS

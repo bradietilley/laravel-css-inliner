@@ -25,7 +25,7 @@ it('can convert css classes to inline styles using CSS file', function () {
     $expect = 'This is a <span class="font-bold" style="font-weight: bold;">test</span>';
 
     $actual = CssInliner::create()
-        ->addCss($file)
+        ->addCssPath($file)
         ->convert($html);
 
     expect($actual)->sameHtml($expect);
@@ -45,7 +45,7 @@ it('can convert css classes to inline styles using embedded style element', func
     expect($actual)->sameHtml($expect);
 });
 
-it('can convert css classes to inline styles using embedded link element', function () {
+it('can convert css classes to inline styles using embedded link element as local file', function () {
     $css = '.example { font-style: italic; }';
     $path = writeTempFile('mail.css', $css);
     $html = '<link rel="stylesheet" href="' . $path . '"> This is a <span class="example">test</span>';
@@ -72,8 +72,8 @@ it('can convert css classes to inline styles using multiple sources', function (
     $expect = 'This is a <span class="example" style="font-weight: bold; font-size: 12px; color: red; text-decoration: underline;">test</span>';
 
     $actual = CssInliner::create()
-        ->addCss($file1)
-        ->addCss($file2)
+        ->addCssPath($file1)
+        ->addCssPath($file2)
         ->addCssRaw($css1)
         ->addCssRaw($css2)
         ->convert($html);

@@ -48,7 +48,7 @@ class CssInliner
      * Add a CSS file to every email/HTML that gets converted
      * by CSS Inliner
      */
-    public function addCss(string|SplFileInfo $file): self
+    public function addCssPath(string|SplFileInfo $file): self
     {
         $this->cssFiles[] = ($file instanceof SplFileInfo) ? $file->getRealPath() : $file;
 
