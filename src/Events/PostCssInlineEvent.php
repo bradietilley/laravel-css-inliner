@@ -10,7 +10,7 @@ use LaravelCssInliner\CssInliner;
  */
 class PostCssInlineEvent
 {
-    public function __construct(public string $html, public CssInliner $cssInliner)
+    public function __construct(public string &$html, public CssInliner $cssInliner)
     {
     }
 }

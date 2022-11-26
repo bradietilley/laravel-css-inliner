@@ -17,7 +17,7 @@ use Symfony\Component\Mime\Email;
  * @method static CssInliner extractCssFromHtmlContent()
  * @method static CssInliner dontExtractCssFromHtmlContent()
  * @method static string readCssFileAsString(string $file)
- * @method static Email convertEmail(string Email)
+ * @method static Email convertEmail(string Email $email)
  * @method static string convert(string $html)
  * @method static string parseCssFromHtml(string $html)
  * @method static CssInliner instance()
