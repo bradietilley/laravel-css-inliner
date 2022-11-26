@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace LaravelCssInliner\Tests;
 
 use LaravelCssInliner\CssInliner;
-use LaravelCssInliner\Facades\CssInline;
 use LaravelCssInliner\LaravelCssInlinerServiceProvider;
 
 class TestCase extends \Orchestra\Testbench\TestCase
@@ -36,9 +35,9 @@ class TestCase extends \Orchestra\Testbench\TestCase
     {
         parent::tearDown();
 
-        foreach (scandir(__DIR__ . '/temp') as $file) {
+        foreach (scandir(__DIR__.'/temp') as $file) {
             if ($file[0] !== '.') {
-                unlink(__DIR__ . '/temp/' . $file);
+                unlink(__DIR__.'/temp/'.$file);
             }
         }
     }

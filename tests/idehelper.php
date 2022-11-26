@@ -9,5 +9,4 @@ namespace Pest;
  */
 class Expectation
 {
-
 }

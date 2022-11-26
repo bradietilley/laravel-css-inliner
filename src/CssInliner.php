@@ -6,6 +6,7 @@ namespace LaravelCssInliner;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Str;
 use LaravelCssInliner\Events\PostCssInlineEvent;
 use LaravelCssInliner\Events\PostEmailCssInlineEvent;
 use LaravelCssInliner\Events\PreCssInlineEvent;
@@ -13,7 +14,6 @@ use LaravelCssInliner\Events\PreEmailCssInlineEvent;
 use SplFileInfo;
 use Symfony\Component\Mime\Email;
 use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
-use Illuminate\Support\Str;
 
 class CssInliner
 {
@@ -128,12 +128,12 @@ class CssInliner
         }
 
         /** If it's multiline, it's safe to assume it's raw CSS */
-        if (Str::contains($css, [ "\n", "\r" ])) {
+        if (Str::contains($css, ["\n", "\r"])) {
             return $this->addCssRaw($css);
         }
 
         /** If it starts with a slash or http protocol, it's safe to assume it's a CSS file */
-        if (Str::startsWith($css, [ '/', 'https://', 'http://' ])) {
+        if (Str::startsWith($css, ['/', 'https://', 'http://'])) {
             return $this->addCssPath($css);
         }
 
@@ -153,7 +153,7 @@ class CssInliner
     public function addCssPath(string|SplFileInfo $file): self
     {
         $file = ($file instanceof SplFileInfo) ? $file->getRealPath() : $file;
-        $this->debug('registered_new_css_file:' . $file);
+        $this->debug('registered_new_css_file:'.$file);
         $this->cssFiles[] = $file;
 
         return $this;
@@ -165,7 +165,7 @@ class CssInliner
      */
     public function addCssRaw(string $css): self
     {
-        $this->debug('registered_new_raw_css_total_characters:' . strlen($css));
+        $this->debug('registered_new_raw_css_total_characters:'.strlen($css));
         $this->cssRaw[] = $css;
 
         return $this;
@@ -285,7 +285,7 @@ class CssInliner
      */
     public function readCssFileAsString(string $file): string
     {
-        $this->debug('reading_css_file_as_string:' . $file);
+        $this->debug('reading_css_file_as_string:'.$file);
 
         if (isset($this->interceptCssFiles[$file])) {
             $this->debug('interceptor_for_file_exists_running_interceptor');
@@ -320,7 +320,7 @@ class CssInliner
      */
     public function interceptCssFile(string $file, callable $callback): self
     {
-        $this->debug('file_specific_interceptor_registered::' . $file);
+        $this->debug('file_specific_interceptor_registered::'.$file);
         $this->interceptCssFiles[$file] = $callback;
 
         return $this;
@@ -420,22 +420,20 @@ class CssInliner
         }
 
         $files = collect($this->cssFiles)->map(fn (string $file) => $this->readCssFileAsString($file));
-        $this->debug('css_files_read_total:' . $files->count());
+        $this->debug('css_files_read_total:'.$files->count());
 
         $raw = collect($this->cssRaw);
-        $this->debug('raw_css_entries_read_totad:' . $files->count());
+        $this->debug('raw_css_entries_read_totad:'.$files->count());
 
         $htmlCss = null;
 
         if ($this->cssFromHtmlContentEnabled) {
             $htmlCss = $this->parseCssFromHtml($html);
 
-            $this->debug('css_within_html_content_parsed_total_s_characters:' . strlen($htmlCss));
+            $this->debug('css_within_html_content_parsed_total_s_characters:'.strlen($htmlCss));
         } else {
             $this->debug('css_within_html_content_ignored');
         }
-
-
 
         $css = collect([
             $files->implode("\n\n"),
@@ -443,7 +441,7 @@ class CssInliner
             $htmlCss ?? '',
         ])->filter()->implode("\n\n");
 
-        $this->debug('all_css_total_characters:' . strlen($css));
+        $this->debug('all_css_total_characters:'.strlen($css));
 
         $lengthWas = strlen($html);
 
@@ -455,7 +453,7 @@ class CssInliner
         Event::dispatch(new PostCssInlineEvent($html, $this));
 
         $this->debug('html_conversion_finished');
-        $this->debug('html_size:' . $lengthWas . ',' . $lengthNow);
+        $this->debug('html_size:'.$lengthWas.','.$lengthNow);
 
         return $html;
     }
@@ -475,7 +473,7 @@ class CssInliner
             callback: function (array $matches) use (&$raw) {
                 $raw[] = $css = $matches[1];
 
-                $this->debug('style_element_extracted_total_characters:' . strlen($css));
+                $this->debug('style_element_extracted_total_characters:'.strlen($css));
 
                 if ($this->cssRemovalFromHtmlContentEnabled()) {
                     $this->debug('style_element_removed_from_html');
@@ -497,10 +495,10 @@ class CssInliner
             ],
             callback: function (array $matches) use (&$raw) {
                 $file = $matches[1];
-                $this->debug('link_stylesheet_element_extracted_path:' . $file);
+                $this->debug('link_stylesheet_element_extracted_path:'.$file);
 
                 $raw[] = $css = $this->readCssFileAsString($file);
-                $this->debug('link_stylesheet_resolved_total_characters:' . strlen($css));
+                $this->debug('link_stylesheet_resolved_total_characters:'.strlen($css));
 
                 if ($this->cssRemovalFromHtmlContentEnabled()) {
                     $this->debug('link_stylesheet_element_removed_from_html');
@@ -515,13 +513,13 @@ class CssInliner
             subject: $html,
         );
 
-        $this->debug('parsed_css_total_elements:' . count($raw));
+        $this->debug('parsed_css_total_elements:'.count($raw));
 
         $css = implode("\n\n", $raw);
         $lengthNow = strlen($html);
 
         $this->debug('parsing_css_from_html_finished');
-        $this->debug('html_size:' . $lengthWas . ',' . $lengthNow);
+        $this->debug('html_size:'.$lengthWas.','.$lengthNow);
 
         return $css;
     }

@@ -1,6 +1,5 @@
 <?php
 
-use LaravelCssInliner\CssInliner;
 use LaravelCssInliner\Facades\CssInline;
 
 it('can add raw css to the instance', function () {

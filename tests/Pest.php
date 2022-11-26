@@ -20,11 +20,11 @@ function cleanHtml(string $html): string
 
 function getTempFilePath(string $name): string
 {
-    if (! is_dir(__DIR__ . '/temp')) {
-        mkdir(__DIR__ . '/temp');
+    if (! is_dir(__DIR__.'/temp')) {
+        mkdir(__DIR__.'/temp');
     }
 
-    return __DIR__ . '/temp/' . $name;
+    return __DIR__.'/temp/'.$name;
 }
 
 function writeTempFile(string $name, string $content): string

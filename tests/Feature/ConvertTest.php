@@ -33,7 +33,7 @@ it('can convert css classes to inline styles using CSS file', function () {
 
 it('can convert css classes to inline styles using embedded style element', function () {
     $css = '.example { text-decoration: underline; }';
-    $html = '<style>' . $css . '</style> This is a <span class="example">test</span>';
+    $html = '<style>'.$css.'</style> This is a <span class="example">test</span>';
 
     $expect = 'This is a <span class="example" style="text-decoration: underline;">test</span>';
 
@@ -48,7 +48,7 @@ it('can convert css classes to inline styles using embedded style element', func
 it('can convert css classes to inline styles using embedded link element as local file', function () {
     $css = '.example { font-style: italic; }';
     $path = writeTempFile('mail.css', $css);
-    $html = '<link rel="stylesheet" href="' . $path . '"> This is a <span class="example">test</span>';
+    $html = '<link rel="stylesheet" href="'.$path.'"> This is a <span class="example">test</span>';
 
     $expect = 'This is a <span class="example" style="font-style: italic;">test</span>';
 
@@ -114,7 +114,6 @@ it('can convert css classes to inline styles and remove style and link elements 
     /**
      * Enabled
      */
-
     $actual = CssInliner::create()
         ->enableCssExtractionFromHtmlContent()
         ->enableCssRemovalFromHtmlContent()
@@ -131,7 +130,6 @@ it('can convert css classes to inline styles and remove style and link elements 
     /**
      * Disabled
      */
-
     $actual = CssInliner::create()
         ->enableCssExtractionFromHtmlContent()
         ->disableCssRemovalFromHtmlContent()

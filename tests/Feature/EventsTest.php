@@ -245,5 +245,3 @@ it('listens to laravel mail sending event but ignores event if disabled', functi
     expect('email_listener_is_disabled_skipping_conversion')->debugLogExists()
         ->and('email_conversion_finished')->debugLogNotExists();
 });
-
-
