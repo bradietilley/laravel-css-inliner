@@ -20,10 +20,10 @@ class CssInliner
     /** Unique instance ID */
     protected string $instance;
 
-    /** CSS files to add to HTML that is converted by CssInliner */
+    /** @var array<string,string> CSS files to add to HTML that is converted by CssInliner */
     protected array $cssFiles = [];
 
-    /** Raw CSS to add to HTML that is converted by CssInliner */
+    /** @var array<int,string> Raw CSS to add to HTML that is converted by CssInliner */
     protected array $cssRaw = [];
 
     /** Should CssInliner read style and link elements from the given HTML? */
@@ -38,13 +38,13 @@ class CssInliner
     /** Should CssInliner continue to convert CSS to inline styles (resets every conversion; used for events) */
     protected bool $process = true;
 
-    /** Callback interceptors for reading CSS files */
+    /** @var array<string,callable> Callback interceptors for reading CSS files */
     protected array $interceptCssFiles = [];
 
     /** Is debug mode enabled? */
     protected static bool $debug = false;
 
-    /** Debug logs */
+    /** @var array<string> Debug logs */
     protected static array $log = [];
 
     /**
@@ -91,6 +91,8 @@ class CssInliner
 
     /**
      * Get the debug log
+     *
+     * @return array<string>
      */
     public static function getDebugLog(): array
     {
@@ -100,11 +102,9 @@ class CssInliner
     /**
      * Log some debug information for when debug mode is enabled
      */
-    public function debug(string $message, ...$bindings): self
+    public function debug(string $message): self
     {
         if (static::$debug) {
-            $message = vsprintf($message, $bindings);
-
             $log = sprintf(
                 '[%s]: %s | %s',
                 Carbon::now()->toDateTimeString(),
@@ -154,7 +154,7 @@ class CssInliner
     {
         $file = ($file instanceof SplFileInfo) ? $file->getRealPath() : $file;
         $this->debug('registered_new_css_file:'.$file);
-        $this->cssFiles[] = $file;
+        $this->cssFiles[$file] = $file;
 
         return $this;
     }
@@ -302,8 +302,15 @@ class CssInliner
         }
 
         $this->debug('reading_css_file_via_file_get_contents');
+        $contents = file_get_contents($file);
 
-        return file_get_contents($file);
+        if ($contents === false) {
+            $this->debug('read_css_file_via_file_get_contents_failed');
+
+            $contents = '';
+        }
+
+        return $contents;
     }
 
     /**
@@ -389,6 +396,12 @@ class CssInliner
             return $email;
         }
 
+        if ($body === null) {
+            $this->debug('email_body_is_null_skipping_conversions');
+
+            return $email;
+        }
+
         $email->html($this->convert($body));
 
         Event::dispatch(new PostEmailCssInlineEvent($email, $this));
@@ -416,7 +429,7 @@ class CssInliner
         if (empty($html)) {
             $this->debug('html_empty_skipping_conversion');
 
-            return $html;
+            return $html; /** @phpstan-ignore-line */
         }
 
         $files = collect($this->cssFiles)->map(fn (string $file) => $this->readCssFileAsString($file));
@@ -488,7 +501,7 @@ class CssInliner
             subject: $html,
         );
 
-        $html = preg_replace_callback(
+        $html = (string) preg_replace_callback(
             pattern: [
                 '/<link[^>]+href="([^"]+)"[^>]+rel="stylesheet"[^>]*>/',
                 '/<link[^>]+rel="stylesheet"[^>]+href="([^"]+)"[^>]*>/',
@@ -510,7 +523,7 @@ class CssInliner
 
                 return $matches[0];
             },
-            subject: $html,
+            subject: $html ?? '',
         );
 
         $this->debug('parsed_css_total_elements:'.count($raw));
@@ -568,11 +581,21 @@ class CssInliner
         return $this;
     }
 
+    /**
+     * Get all registered CSS files
+     *
+     * @return array<string,string>
+     */
     public function cssFiles(): array
     {
         return $this->cssFiles;
     }
 
+    /**
+     * Get all registered raw CSS strings
+     *
+     * @return array<int,string>
+     */
     public function cssRaw(): array
     {
         return $this->cssRaw;
