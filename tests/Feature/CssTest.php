@@ -18,10 +18,11 @@ it('can add raw css to the instance', function () {
 it('can add css files to the instance', function () {
     CssInline::addCssPath($file1 = getTempFilePath('styles1.css'));
     CssInline::addCssPath($file2 = getTempFilePath('styles2.css'));
+    CssInline::addCssPath($file1 = getTempFilePath('styles1.css'));
 
     expect(CssInline::cssFiles())->toBe([
-        $file1,
-        $file2,
+        $file1 => $file1,
+        $file2 => $file2,
     ]);
 });
 
@@ -47,9 +48,9 @@ it('can add css files and raw css to the instance', function () {
     ]);
 
     expect(CssInline::cssFiles())->toBe([
-        $file1,
-        $file2,
-        $file3,
-        $file4,
+        $file1 => $file1,
+        $file2 => $file2,
+        $file3 => $file3,
+        $file4 => $file4,
     ]);
 });
