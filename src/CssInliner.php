@@ -268,7 +268,7 @@ class CssInliner
     public function disableCssRemovalFromHtmlContent(): self
     {
         $this->debug('disabled_css_removal_from_html_content');
-        $this->cssRemovalFromHtmlContentEnabled = true;
+        $this->cssRemovalFromHtmlContentEnabled = false;
 
         return $this;
     }
