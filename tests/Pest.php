@@ -11,7 +11,7 @@ function cleanHtml(string $html): string
 {
     return trim(
         preg_replace(
-            pattern: '/.*<body><p>(.+)<\/p><\/body>.*/s',
+            pattern: '/.*<body>(?:<p>)?(.+?)(?:<\/p>)?<\/body>.*/s',
             replacement: '$1',
             subject: $html,
         ),
