@@ -80,3 +80,68 @@ it('can convert css classes to inline styles using multiple sources', function (
 
     expect($actual)->sameHtml($expect);
 });
+
+it('can convert css classes to inline styles and remove style and link elements from html', function () {
+    $path1 = getTempFilePath('main.css');
+    $path2 = getTempFilePath('other.css');
+
+    file_put_contents($path1, '.underline { text-decoration: underline; }');
+    file_put_contents($path2, '.font-lg { font-size: 4em; }');
+
+    $html = <<<HTML
+    <html>
+        <head>
+            <style>
+                .font-bold {
+                    font-weight: bold;
+                }
+            </style>
+            <style>
+                .italic {
+                    font-style: italic;
+                }
+            </style>
+
+            <link rel="stylesheet" href="{$path1}">
+            <link href="{$path2}" rel="stylesheet">
+        </head>
+        <body>
+            <span class="font-bold italic underline font-lg">Nice</span>
+        </body>
+    </html>
+    HTML;
+
+    /**
+     * Enabled
+     */
+
+    $actual = CssInliner::create()
+        ->enableCssExtractionFromHtmlContent()
+        ->enableCssRemovalFromHtmlContent()
+        ->convert($html);
+
+    $expect = '<span class="font-bold italic underline font-lg" style="font-weight: bold; font-style: italic; font-size: 4em; text-decoration: underline;">Nice</span>';
+    expect($actual)->sameHtml($expect);
+
+    preg_match('/<head>(.+)<\/head>/is', $actual, $matches);
+
+    $head = trim($matches[1]);
+    expect($head)->toBe('');
+
+    /**
+     * Disabled
+     */
+
+    $actual = CssInliner::create()
+        ->enableCssExtractionFromHtmlContent()
+        ->disableCssRemovalFromHtmlContent()
+        ->convert($html);
+
+    $expect = '<span class="font-bold italic underline font-lg" style="font-weight: bold; font-style: italic; font-size: 4em; text-decoration: underline;">Nice</span>';
+    expect($actual)->sameHtml($expect);
+
+    preg_match('/<head>(.+)<\/head>/is', $actual, $matches);
+
+    $head = trim($matches[1]);
+    expect($head)->not()->toBe('');
+});
