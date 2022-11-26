@@ -12,6 +12,7 @@ use Symfony\Component\Mime\Email;
  * @mixin CssInliner
  *
  * @method static CssInliner debug(string $message)
+ * @method static CssInliner addCss(string|SplFileInfo $file)
  * @method static CssInliner addCssPath(string|SplFileInfo $file)
  * @method static CssInliner addCssRaw(string $css)
  * @method static CssInliner clearCss()
