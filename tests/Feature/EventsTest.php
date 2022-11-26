@@ -2,12 +2,14 @@
 
 declare(strict_types=1);
 
+use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
 use LaravelCssInliner\CssInliner;
 use LaravelCssInliner\Events\PostCssInlineEvent;
 use LaravelCssInliner\Events\PostEmailCssInlineEvent;
 use LaravelCssInliner\Events\PreCssInlineEvent;
 use LaravelCssInliner\Events\PreEmailCssInlineEvent;
+use LaravelCssInliner\Facades\CssInline;
 use Symfony\Component\Mime\Email;
 
 it('will fire events when converting HTML', function () {
@@ -176,4 +178,29 @@ it('will allow halting of email conversion by halting css inliner', function () 
 
     // No change
     expect($actual->getHtmlBody())->sameHtml($expect);
+});
+
+it('listens to laravel mail sending event', function () {
+    $css = '.font-bold { font-weight: bold; }';
+    $email = new Email();
+    $email->html($html = 'Test<span class="font-bold">Test</span>Test');
+
+    $expect = 'Test<span class="font-bold" style="font-weight: bold;">Test</span>Test';
+
+    CssInline::addCssRaw($css);
+
+    $preEmail = null;
+    $postEmail = null;
+    CssInline::beforeConvertingEmail(function (PreEmailCssInlineEvent $event) use (&$preEmail) {
+        $preEmail = $event->email;
+    });
+    CssInline::afterConvertingEmail(function (PostEmailCssInlineEvent $event) use (&$postEmail) {
+        $postEmail = $event->email;
+    });
+
+    Event::dispatch(new MessageSending($email, []));
+
+    expect($preEmail)->toBe($email)
+        ->and($postEmail)->toBe($email)
+        ->and($email->getHtmlBody())->sameHtml($expect);
 });
