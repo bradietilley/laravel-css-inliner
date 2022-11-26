@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace LaravelCssInliner\Tests;
 
+use LaravelCssInliner\CssInliner;
+use LaravelCssInliner\Facades\CssInline;
 use LaravelCssInliner\LaravelCssInlinerServiceProvider;
 
 class TestCase extends \Orchestra\Testbench\TestCase
@@ -17,6 +19,17 @@ class TestCase extends \Orchestra\Testbench\TestCase
     {
         return [
         ];
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        CssInliner::enableDebug();
+        CssInliner::flushDebugLog();
+
+        // New instance
+        app()->singleton(CssInliner::class, fn () => new CssInliner());
     }
 
     protected function tearDown(): void

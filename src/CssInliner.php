@@ -50,7 +50,10 @@ class CssInliner
     /**
      * Create a new CssInliner instance
      *
-     * For Laravel: use the facade or `app(CssInliner::class)`
+     * For Laravel: it's recommended you use the facade
+     * or at least `app(CssInliner::class)` to ensure that
+     * you're also referencing a singleton not a stray
+     * instance
      */
     public static function create(): self
     {
@@ -79,17 +82,37 @@ class CssInliner
     }
 
     /**
+     * Reset the log
+     */
+    public static function flushDebugLog(): void
+    {
+        static::$log = [];
+    }
+
+    /**
+     * Get the debug log
+     */
+    public static function getDebugLog(): array
+    {
+        return static::$log;
+    }
+
+    /**
      * Log some debug information for when debug mode is enabled
      */
-    public function debug(string $message): self
+    public function debug(string $message, ...$bindings): self
     {
         if (static::$debug) {
-            static::$log[] = sprintf(
+            $message = vsprintf($message, $bindings);
+
+            $log = sprintf(
                 '[%s]: %s | %s',
                 Carbon::now()->toDateTimeString(),
                 $this->instance,
                 $message,
             );
+
+            static::$log[] = $log;
         }
 
         return $this;
@@ -102,7 +125,7 @@ class CssInliner
     public function addCssPath(string|SplFileInfo $file): self
     {
         $file = ($file instanceof SplFileInfo) ? $file->getRealPath() : $file;
-        $this->debug('Registered new CSS file: ' . $file);
+        $this->debug('registered_new_css_file:' . $file);
         $this->cssFiles[] = $file;
 
         return $this;
@@ -114,7 +137,7 @@ class CssInliner
      */
     public function addCssRaw(string $css): self
     {
-        $this->debug(sprintf('Registered new raw CSS (total %s characters)', strlen($css)));
+        $this->debug('registered_new_raw_css_total_characters:' . strlen($css));
         $this->cssRaw[] = $css;
 
         return $this;
@@ -125,7 +148,7 @@ class CssInliner
      */
     public function clearCss(): self
     {
-        $this->debug('Registered CSS cleared');
+        $this->debug('registered_css_cleared');
         $this->cssFiles = [];
         $this->cssRaw = [];
 
@@ -145,7 +168,7 @@ class CssInliner
      */
     public function enableEmailListener(): self
     {
-        $this->debug('Enabled email listener');
+        $this->debug('enabled_email_listener');
         $this->emailListenerEnabled = true;
 
         return $this;
@@ -156,8 +179,8 @@ class CssInliner
      */
     public function disableEmailListener(): self
     {
-        $this->debug('Disabled email listener');
-        $this->emailListenerEnabled = true;
+        $this->debug('disabled_email_listener');
+        $this->emailListenerEnabled = false;
 
         return $this;
     }
@@ -175,7 +198,7 @@ class CssInliner
      */
     public function enableCssExtractionFromHtmlContent(): self
     {
-        $this->debug('Enabled CSS extraction from HTML content');
+        $this->debug('enabled_css_extraction_from_html_content');
         $this->cssFromHtmlContentEnabled = true;
 
         return $this;
@@ -186,7 +209,7 @@ class CssInliner
      */
     public function disableCssExtractionFromHtmlContent(): self
     {
-        $this->debug('Disabled CSS extraction from HTML content');
+        $this->debug('disabled_css_extraction_from_html_content');
         $this->cssFromHtmlContentEnabled = true;
 
         return $this;
@@ -205,7 +228,7 @@ class CssInliner
      */
     public function enableCssRemovalFromHtmlContent(): self
     {
-        $this->debug('Enabled CSS Removal from HTML content');
+        $this->debug('enabled_css_removal_from_html_content');
         $this->cssRemovalFromHtmlContentEnabled = true;
 
         return $this;
@@ -216,7 +239,7 @@ class CssInliner
      */
     public function disableCssRemovalFromHtmlContent(): self
     {
-        $this->debug('Disabled CSS Removal from HTML content');
+        $this->debug('disabled_css_removal_from_html_content');
         $this->cssRemovalFromHtmlContentEnabled = true;
 
         return $this;
@@ -234,23 +257,23 @@ class CssInliner
      */
     public function readCssFileAsString(string $file): string
     {
-        $this->debug('Reading CSS file as string: ' . $file);
+        $this->debug('reading_css_file_as_string:' . $file);
 
         if (isset($this->interceptCssFiles[$file])) {
-            $this->debug('Interceptor for file exists; running interceptor');
+            $this->debug('interceptor_for_file_exists_running_interceptor');
             $callback = $this->interceptCssFiles[$file];
 
             return $callback($file, $this);
         }
 
         if (isset($this->interceptCssFiles['*'])) {
-            $this->debug('Global file interceptor exists; running interceptor');
+            $this->debug('global_file_interceptor_exists_running_interceptor');
             $callback = $this->interceptCssFiles['*'];
 
             return $callback($file, $this);
         }
 
-        $this->debug('Reading CSS file via file_get_contents');
+        $this->debug('reading_css_file_via_file_get_contents');
 
         return file_get_contents($file);
     }
@@ -269,7 +292,7 @@ class CssInliner
      */
     public function interceptCssFile(string $file, callable $callback): self
     {
-        $this->debug(sprintf('File-specific interceptor registered (%s)', $file));
+        $this->debug('file_specific_interceptor_registered::' . $file);
         $this->interceptCssFiles[$file] = $callback;
 
         return $this;
@@ -291,7 +314,7 @@ class CssInliner
      */
     public function interceptCssFiles(callable $callback): self
     {
-        $this->debug('Global file interceptor registered');
+        $this->debug('global_file_interceptor_registered');
         $this->interceptCssFiles['*'] = $callback;
 
         return $this;
@@ -302,7 +325,7 @@ class CssInliner
      */
     public function clearInterceptors(): self
     {
-        $this->debug('Interceptors cleared');
+        $this->debug('interceptors_cleared');
         $this->interceptCssFiles = [];
 
         return $this;
@@ -313,11 +336,11 @@ class CssInliner
      */
     public function convertEmail(Email $email): Email
     {
-        $this->debug('Email conversion started.');
+        $this->debug('email_conversion_started');
 
         // Don't change anything if the email listener is disabled
         if ($this->emailListenerEnabled() === false) {
-            $this->debug('Email listener is disabled; skipping conversion.');
+            $this->debug('email_listener_is_disabled_skipping_conversion');
 
             return $email;
         }
@@ -325,7 +348,7 @@ class CssInliner
         Event::dispatch(new PreEmailCssInlineEvent($email, $this));
 
         if ($this->process === false) {
-            $this->debug('Processing has been disabled; skipping conversion.');
+            $this->debug('email_processing_has_been_halted_skipping_conversion');
 
             return $email;
         }
@@ -333,7 +356,7 @@ class CssInliner
         $body = $email->getHtmlBody();
 
         if (is_resource($body)) {
-            $this->debug('Email body is resource; skipping conversion.');
+            $this->debug('email_body_is_resource_skipping_conversion');
 
             return $email;
         }
@@ -342,7 +365,7 @@ class CssInliner
 
         Event::dispatch(new PostEmailCssInlineEvent($email, $this));
 
-        $this->debug('Email conversion finished.');
+        $this->debug('email_conversion_finished');
 
         return $email;
     }
@@ -352,37 +375,39 @@ class CssInliner
      */
     public function convert(string $html): string
     {
-        $this->debug('HTML conversion started.');
+        $this->debug('html_conversion_started');
 
         Event::dispatch(new PreCssInlineEvent($html, $this));
 
         if ($this->process === false) {
-            $this->debug('Processing has been disabled; skipping conversion.');
+            $this->debug('html_processing_has_been_halted_skipping_conversion');
 
             return $html;
         }
 
         if (empty($html)) {
-            $this->debug('HTML empty; skipping conversion');
+            $this->debug('html_empty_skipping_conversion');
 
             return $html;
         }
 
         $files = collect($this->cssFiles)->map(fn (string $file) => $this->readCssFileAsString($file));
-        $this->debug(sprintf('CSS Files read (total %d)', $files->count()));
+        $this->debug('css_files_read_total:' . $files->count());
 
         $raw = collect($this->cssRaw);
-        $this->debug(sprintf('Raw CSS entries read (total %d)', $files->count()));
+        $this->debug('raw_css_entries_read_totad:' . $files->count());
 
-        $htmlCss = ($this->cssFromHtmlContentEnabled)
-            ? $this->parseCssFromHtml($html)
-            : null;
+        $htmlCss = null;
 
-        $this->debug(
-            ($htmlCss === null)
-                ? 'CSS within HTML content ignored'
-                : sprintf('CSS within HTML content parsed (total %s characters)', strlen($html)),
-        );
+        if ($this->cssFromHtmlContentEnabled) {
+            $htmlCss = $this->parseCssFromHtml($html);
+
+            $this->debug('css_within_html_content_parsed_total_s_characters:' . strlen($htmlCss));
+        } else {
+            $this->debug('css_within_html_content_ignored');
+        }
+
+
 
         $css = collect([
             $files->implode("\n\n"),
@@ -390,7 +415,7 @@ class CssInliner
             $htmlCss ?? '',
         ])->filter()->implode("\n\n");
 
-        $this->debug(sprintf('All CSS (total %s characters)', strlen($css)));
+        $this->debug('all_css_total_characters:' . strlen($css));
 
         $lengthWas = strlen($html);
 
@@ -401,8 +426,8 @@ class CssInliner
 
         Event::dispatch(new PostCssInlineEvent($html, $this));
 
-        $this->debug('HTML conversion finished.');
-        $this->debug('HTML size was %s, now %s.', $lengthWas, $lengthNow);
+        $this->debug('html_conversion_finished');
+        $this->debug('html_size:' . $lengthWas . ',' . $lengthNow);
 
         return $html;
     }
@@ -412,7 +437,7 @@ class CssInliner
      */
     public function parseCssFromHtml(string &$html): string
     {
-        $this->debug('Parsing CSS from HTML started');
+        $this->debug('parsing_css_from_html_started');
 
         $raw = [];
         $lengthWas = strlen($html);
@@ -422,15 +447,15 @@ class CssInliner
             callback: function (array $matches) use (&$raw) {
                 $raw[] = $css = $matches[1];
 
-                $this->debug(sprintf('Style element extracted (total %s characters)', strlen($css)));
+                $this->debug('style_element_extracted_total_characters:' . strlen($css));
 
                 if ($this->cssRemovalFromHtmlContentEnabled()) {
-                    $this->debug('Style element removed from HTML');
+                    $this->debug('style_element_removed_from_html');
 
                     return '';
                 }
 
-                $this->debug('Style element retained in HTML');
+                $this->debug('style_element_retained_in_html');
 
                 return $matches[0];
             },
@@ -444,38 +469,38 @@ class CssInliner
             ],
             callback: function (array $matches) use (&$raw) {
                 $file = $matches[1];
-                $this->debug(sprintf('Link stylesheet element extracted (path: %s)', $file));
+                $this->debug('link_stylesheet_element_extracted_path:' . $file);
 
                 $raw[] = $css = $this->readCssFileAsString($file);
-                $this->debug(sprintf('Link stylesheet resolved (total %s characters)', strlen($css)));
+                $this->debug('link_stylesheet_resolved_total_characters:' . strlen($css));
 
                 if ($this->cssRemovalFromHtmlContentEnabled()) {
-                    $this->debug('Link stylesheet element removed from HTML');
+                    $this->debug('link_stylesheet_element_removed_from_html');
 
                     return '';
                 }
 
-                $this->debug('Link stylesheet element retained in HTML');
+                $this->debug('link_stylesheet_element_retained_in_html');
 
                 return $matches[0];
             },
             subject: $html,
         );
 
-        $this->debug('Parsed CSS (total %s elements)', count($raw));
+        $this->debug('parsed_css_total_elements:' . count($raw));
 
         $css = implode("\n\n", $raw);
         $lengthNow = strlen($html);
 
-        $this->debug('Parsing CSS from HTML finished');
-        $this->debug('HTML size was %s, now %s.', $lengthWas, $lengthNow);
+        $this->debug('parsing_css_from_html_finished');
+        $this->debug('html_size:' . $lengthWas . ',' . $lengthNow);
 
         return $css;
     }
 
     public function beforeConvertingEmail(callable $callback): self
     {
-        $this->debug('Registered callback: beforeConvertingEmail');
+        $this->debug('registered_callback_before_converting_email');
         Event::listen(PreEmailCssInlineEvent::class, fn (PreEmailCssInlineEvent $event) => $callback($event));
 
         return $this;
@@ -483,7 +508,7 @@ class CssInliner
 
     public function afterConvertingEmail(callable $callback): self
     {
-        $this->debug('Registered callback: afterConvertingEmail');
+        $this->debug('registered_callback_after_converting_email');
         Event::listen(PostEmailCssInlineEvent::class, fn (PostEmailCssInlineEvent $event) => $callback($event));
 
         return $this;
@@ -491,7 +516,7 @@ class CssInliner
 
     public function beforeConvertingHtml(callable $callback): self
     {
-        $this->debug('Registered callback: beforeConvertingHtml');
+        $this->debug('registered_callback_before_converting_html');
         Event::listen(PreCssInlineEvent::class, fn (PreCssInlineEvent $event) => $callback($event));
 
         return $this;
@@ -499,12 +524,19 @@ class CssInliner
 
     public function afterConvertingHtml(callable $callback): self
     {
-        $this->debug('Registered callback: afterConvertingHtml');
+        $this->debug('registered_callback_after_converting_html');
         Event::listen(PostCssInlineEvent::class, fn (PostCssInlineEvent $event) => $callback($event));
 
         return $this;
     }
 
+    /**
+     * Provides an interface for you to return the singleton
+     * instance from the facade
+     *
+     * Example:
+     *      CssInline::instance()->blah()->blah()->blah();
+     */
     public function instance(): self
     {
         return $this;

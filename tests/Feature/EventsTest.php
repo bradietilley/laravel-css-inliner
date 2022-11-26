@@ -51,7 +51,8 @@ it('will fire events when converting HTML', function () {
     expect($callbacks[PreEmailCssInlineEvent::class])->toBe(0)
         ->and($callbacks[PreCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PostCssInlineEvent::class])->toBe(1)
-        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(0);
+        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(0)
+        ->and('html_conversion_finished')->debugLogExists();
 });
 
 it('will fire events when converting an email', function () {
@@ -119,7 +120,8 @@ it('will fire events when converting an email', function () {
     expect($callbacks[PreEmailCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PreCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PostCssInlineEvent::class])->toBe(1)
-        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(1);
+        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(1)
+        ->and('email_conversion_finished')->debugLogExists();
 });
 
 it('will allow modification of html during pre and post events', function () {
@@ -145,7 +147,8 @@ it('will allow modification of html during pre and post events', function () {
         subject: $actual,
     );
 
-    expect($actual)->sameHtml($expect);
+    expect($actual)->sameHtml($expect)
+        ->and('html_conversion_finished')->debugLogExists();
 });
 
 it('will allow halting of html conversion by halting css inliner', function () {
@@ -159,7 +162,10 @@ it('will allow halting of html conversion by halting css inliner', function () {
         ->convert($html);
 
     // No change
-    expect($actual)->sameHtml($expect);
+    expect($actual)->sameHtml($expect)
+        ->and('html_processing_has_been_halted_skipping_conversion')->debugLogExists()
+        ->and('email_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
+        ->and('email_conversion_finished')->debugLogNotExists();
 });
 
 it('will allow halting of email conversion by halting css inliner', function () {
@@ -177,7 +183,10 @@ it('will allow halting of email conversion by halting css inliner', function () 
         ->convertEmail($email);
 
     // No change
-    expect($actual->getHtmlBody())->sameHtml($expect);
+    expect($actual->getHtmlBody())->sameHtml($expect)
+        ->and('email_processing_has_been_halted_skipping_conversion')->debugLogExists()
+        ->and('html_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
+        ->and('email_conversion_finished')->debugLogNotExists();
 });
 
 it('listens to laravel mail sending event', function () {
@@ -202,5 +211,39 @@ it('listens to laravel mail sending event', function () {
 
     expect($preEmail)->toBe($email)
         ->and($postEmail)->toBe($email)
-        ->and($email->getHtmlBody())->sameHtml($expect);
+        ->and($email->getHtmlBody())->sameHtml($expect)
+        ->and('email_listener_is_disabled_skipping_conversion')->debugLogNotExists()
+        ->and('email_conversion_finished')->debugLogExists();
 });
+
+it('listens to laravel mail sending event but ignores event if disabled', function () {
+    $css = '.font-bold { font-weight: bold; }';
+    $email = new Email();
+    $email->html($html = 'Test<span class="font-bold">Test</span>Test');
+
+    $expect = $html;
+
+    CssInline::addCssRaw($css);
+
+    $preEmail = null;
+    $postEmail = null;
+    CssInline::disableEmailListener();
+
+    CssInline::beforeConvertingEmail(function (PreEmailCssInlineEvent $event) use (&$preEmail) {
+        $preEmail = $event->email;
+    });
+    CssInline::afterConvertingEmail(function (PostEmailCssInlineEvent $event) use (&$postEmail) {
+        $postEmail = $event->email;
+    });
+
+    Event::dispatch(new MessageSending($email, []));
+
+    expect($preEmail)->toBeNull()
+        ->and($postEmail)->toBeNull()
+        ->and($email->getHtmlBody())->sameHtml($expect);
+
+    expect('email_listener_is_disabled_skipping_conversion')->debugLogExists()
+        ->and('email_conversion_finished')->debugLogNotExists();
+});
+
+
