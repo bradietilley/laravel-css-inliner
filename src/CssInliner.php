@@ -119,6 +119,34 @@ class CssInliner
     }
 
     /**
+     * Add raw CSS or a CSS file.
+     */
+    public function addCss(string|SplFileInfo $css): self
+    {
+        if ($css instanceof SplFileInfo) {
+            return $this->addCssPath($css);
+        }
+
+        /** If it's multiline, it's safe to assume it's raw CSS */
+        if (Str::contains($css, [ "\n", "\r" ])) {
+            return $this->addCssRaw($css);
+        }
+
+        /** If it starts with a slash or http protocol, it's safe to assume it's a CSS file */
+        if (Str::startsWith($css, [ '/', 'https://', 'http://' ])) {
+            return $this->addCssPath($css);
+        }
+
+        /** Only thing left is a relative file, or a single line CSS */
+        if (Str::endsWith($css, '.css')) {
+            return $this->addCssPath($css);
+        }
+
+        /** Assume then that it's a single line CSS file :shrug: */
+        return $this->addCssRaw($css);
+    }
+
+    /**
      * Add a CSS file to every email/HTML that gets converted
      * by CSS Inliner
      */
