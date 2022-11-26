@@ -146,7 +146,7 @@ it('will allow modification of html during pre and post events', function () {
     expect($actual)->sameHtml($expect);
 });
 
-it('will allow aborting of html conversion by halting css inliner', function () {
+it('will allow halting of html conversion by halting css inliner', function () {
     $css = '.font-bold { font-weight: bold; }';
     $html = 'Test<span class="font-bold">Test</span>Test';
 
@@ -160,8 +160,7 @@ it('will allow aborting of html conversion by halting css inliner', function () 
     expect($actual)->sameHtml($expect);
 });
 
-
-it('will allow aborting of email conversion by halting css inliner', function () {
+it('will allow halting of email conversion by halting css inliner', function () {
     $css = '.font-bold { font-weight: bold; }';
     $html = 'Test<span class="font-bold">Test</span>Test';
 
