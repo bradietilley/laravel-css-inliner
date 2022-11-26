@@ -18,4 +18,15 @@ class TestCase extends \Orchestra\Testbench\TestCase
         return [
         ];
     }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        foreach (scandir(__DIR__ . '/temp') as $file) {
+            if ($file[0] !== '.') {
+                unlink(__DIR__ . '/temp/' . $file);
+            }
+        }
+    }
 }
