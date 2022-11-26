@@ -426,10 +426,10 @@ class CssInliner
             return $html;
         }
 
-        if (empty($html)) {
+        if (strlen(trim($html)) === 0) {
             $this->debug('html_empty_skipping_conversion');
 
-            return $html; /** @phpstan-ignore-line */
+            return $html;
         }
 
         $files = collect($this->cssFiles)->map(fn (string $file) => $this->readCssFileAsString($file));
