@@ -611,9 +611,13 @@ class CssInliner
 
     /**
      * Halt the conversion of CSS to inline styles
+     *
+     * @return false
      */
-    public function halt(): void
+    public function halt(): bool
     {
         $this->process = false;
+
+        return false;
     }
 }

@@ -82,6 +82,7 @@ it('will fire events when converting an email', function () {
             /* Email is same entity */
             expect($event->email)->toBe($email);
         })
+        ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->cssInliner->debug('ran_second_event'))
         ->beforeConvertingHtml(function (PreCssInlineEvent $event) use ($html, $css, &$callbacks) {
             $callbacks[PreCssInlineEvent::class]++;
 
@@ -121,7 +122,8 @@ it('will fire events when converting an email', function () {
         ->and($callbacks[PreCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PostCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(1)
-        ->and('email_conversion_finished')->debugLogExists();
+        ->and('email_conversion_finished')->debugLogExists()
+        ->and('ran_second_event')->debugLogExists();
 });
 
 it('will allow modification of html during pre and post events', function () {
@@ -131,6 +133,7 @@ it('will allow modification of html during pre and post events', function () {
     $expect = 'Test<span class="font-bold" style="font-weight: bold;">Test</span>Test';
     $actual = CssInliner::create()
         ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->html .= 'something1')
+        ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->cssInliner->debug('ran_second_event'))
         ->afterConvertingHtml(fn (PostCssInlineEvent $event) => $event->html .= 'something2')
         ->addCssRaw($css)
         ->convert($html);
@@ -148,7 +151,8 @@ it('will allow modification of html during pre and post events', function () {
     );
 
     expect($actual)->sameHtml($expect)
-        ->and('html_conversion_finished')->debugLogExists();
+        ->and('html_conversion_finished')->debugLogExists()
+        ->and('ran_second_event')->debugLogExists();
 });
 
 it('will allow halting of html conversion by halting css inliner', function () {
@@ -158,6 +162,7 @@ it('will allow halting of html conversion by halting css inliner', function () {
     $expect = $html;
     $actual = CssInliner::create()
         ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->cssInliner->halt())
+        ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->cssInliner->debug('ran_second_event'))
         ->addCssRaw($css)
         ->convert($html);
 
@@ -165,6 +170,7 @@ it('will allow halting of html conversion by halting css inliner', function () {
     expect($actual)->sameHtml($expect)
         ->and('html_processing_has_been_halted_skipping_conversion')->debugLogExists()
         ->and('email_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
+        ->and('ran_second_event')->debugLogNotExists()
         ->and('email_conversion_finished')->debugLogNotExists();
 });
 
@@ -179,6 +185,7 @@ it('will allow halting of email conversion by halting css inliner', function () 
 
     $actual = CssInliner::create()
         ->beforeConvertingEmail(fn (PreEmailCssInlineEvent $event) => $event->cssInliner->halt())
+        ->beforeConvertingHtml(fn (PreEmailCssInlineEvent $event) => $event->cssInliner->debug('ran_second_event'))
         ->addCssRaw($css)
         ->convertEmail($email);
 
@@ -186,6 +193,7 @@ it('will allow halting of email conversion by halting css inliner', function () 
     expect($actual->getHtmlBody())->sameHtml($expect)
         ->and('email_processing_has_been_halted_skipping_conversion')->debugLogExists()
         ->and('html_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
+        ->and('ran_second_event')->debugLogNotExists()
         ->and('email_conversion_finished')->debugLogNotExists();
 });
 
