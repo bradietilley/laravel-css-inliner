@@ -268,6 +268,40 @@ it('listens to laravel mail sending event', function () {
         ->and('email_conversion_finished')->debugLogExists();
 });
 
+it('will allow halting of html conversion by halting css inliner but will allow subsequent conversions', function () {
+    $css = '.font-bold { font-weight: bold; }';
+    $html = 'Test<span class="font-bold">Test</span>Test';
+
+    $expect = $html;
+
+    $actual = CssInliner::singleton()
+        ->beforeConvertingHtml(fn (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => (str_contains($eventHtml, 'second')) ? null : $eventInliner->halt())
+        ->beforeConvertingHtml(fn (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
+        ->addCssRaw($css)
+        ->convert($html);
+
+    // No change
+    expect($actual)->sameHtml($expect)
+        ->and('html_processing_has_been_halted_skipping_conversion')->debugLogExists()
+        ->and('email_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
+        ->and('ran_second_event')->debugLogNotExists()
+        ->and('html_conversion_finished')->debugLogNotExists();
+
+    CssInliner::flushDebugLog();
+
+    $html = 'Test<span class="font-bold">Test second</span>Test';
+    $expect = 'Test<span class="font-bold" style="font-weight: bold;">Test second</span>Test';
+
+    $actual = CssInliner::singleton()
+        ->addCssRaw($css)
+        ->convert($html);
+
+    // No change
+    expect($actual)->sameHtml($expect)
+        ->and('html_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
+        ->and('html_conversion_finished')->debugLogExists();
+});
+
 it('listens to laravel mail sending event but ignores event if disabled', function () {
     $css = '.font-bold { font-weight: bold; }';
     $email = new Email();

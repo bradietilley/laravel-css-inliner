@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LaravelCssInliner;
 
 use Carbon\Carbon;
+use Carbon\Exceptions\UnitException;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use LaravelCssInliner\Events\PostCssInlineEvent;
@@ -371,6 +372,9 @@ class CssInliner
      */
     public function convertEmail(Email $email): Email
     {
+        /* Reset any previous halts() */
+        $this->process = true;
+
         $this->debug('email_conversion_started');
 
         // Don't change anything if the email listener is disabled
@@ -402,7 +406,7 @@ class CssInliner
             return $email;
         }
 
-        $email->html($this->convert($body));
+        $email->html($this->convertInternalHtml($body));
 
         Event::dispatch(new PostEmailCssInlineEvent($email, $this));
 
@@ -415,6 +419,17 @@ class CssInliner
      * Convert the given HTML content to use inline styles
      */
     public function convert(string $html): string
+    {
+        /* Reset any previous halts() */
+        $this->process = true;
+
+        return $this->convertInternalHtml($html);
+    }
+
+    /**
+     * Convert the given HTML content to use inline styles
+     */
+    private function convertInternalHtml(string $html): string
     {
         $this->debug('html_conversion_started');
 
