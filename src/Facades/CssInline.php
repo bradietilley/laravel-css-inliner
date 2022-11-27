@@ -11,8 +11,12 @@ use Symfony\Component\Mime\Email;
 /**
  * @mixin CssInliner
  *
+ * @method static void enableDebug()
+ * @method static void disableDebug()
+ * @method static void flushDebugLog()
+ * @method static array getDebugLog()
  * @method static CssInliner debug(string $message)
- * @method static CssInliner addCss(string|SplFileInfo $file)
+ * @method static CssInliner addCss(string|SplFileInfo $css)
  * @method static CssInliner addCssPath(string|SplFileInfo $file)
  * @method static CssInliner addCssRaw(string $css)
  * @method static CssInliner clearCss()
@@ -31,6 +35,7 @@ use Symfony\Component\Mime\Email;
  * @method static CssInliner clearInterceptors()
  * @method static Email convertEmail(Email $email)
  * @method static string convert(string $html)
+ * @method static void stripCssFromHtml(string &$html)
  * @method static string parseCssFromHtml(string &$html)
  * @method static CssInliner beforeConvertingEmail(callable $callback)
  * @method static CssInliner afterConvertingEmail(callable $callback)
@@ -39,7 +44,7 @@ use Symfony\Component\Mime\Email;
  * @method static CssInliner instance()
  * @method static array cssFiles()
  * @method static array cssRaw()
- * @method static void halt()
+ * @method static false halt()
  */
 class CssInline extends Facade
 {
