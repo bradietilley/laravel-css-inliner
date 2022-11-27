@@ -56,7 +56,7 @@ echo $email->getHtmlBody(); // <html><body><div class="font-bold" style="font-we
 
 #### Option: Automatically parse Laravel email (or don't automatically parse Laravel email)
 
-You may wish to conditionally enable or disable the CSS Inliner for mail sent from Laravel (via `Mail::send()`). To do this, we can leverage the `emailListener` option. Default is `true` (and as such will automatically convert CSS found in your emails sent from Laravel).
+You may wish to conditionally enable or disable the CSS Inliner for mail sent from Laravel (via `Mail::send()`). To do this, we can leverage the `emailListener` option. Default is `true` (and as such will automatically convert CSS classes found in your emails sent from Laravel).
 
 ```php
 use LaravelCssInliner\Facades\CssInline;
