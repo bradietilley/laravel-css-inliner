@@ -558,7 +558,10 @@ class CssInliner
     public function beforeConvertingEmail(callable $callback): self
     {
         $this->debug('registered_callback_before_converting_email');
-        Event::listen(PreEmailCssInlineEvent::class, fn (PreEmailCssInlineEvent $event) => $callback($event));
+        Event::listen(
+            PreEmailCssInlineEvent::class,
+            fn (PreEmailCssInlineEvent $event) => $callback($event->email, $event->cssInliner, $event),
+        );
 
         return $this;
     }
@@ -566,7 +569,10 @@ class CssInliner
     public function afterConvertingEmail(callable $callback): self
     {
         $this->debug('registered_callback_after_converting_email');
-        Event::listen(PostEmailCssInlineEvent::class, fn (PostEmailCssInlineEvent $event) => $callback($event));
+        Event::listen(
+            PostEmailCssInlineEvent::class,
+            fn (PostEmailCssInlineEvent $event) => $callback($event->email, $event->cssInliner, $event),
+        );
 
         return $this;
     }
@@ -574,7 +580,10 @@ class CssInliner
     public function beforeConvertingHtml(callable $callback): self
     {
         $this->debug('registered_callback_before_converting_html');
-        Event::listen(PreCssInlineEvent::class, fn (PreCssInlineEvent $event) => $callback($event));
+        Event::listen(
+            PreCssInlineEvent::class,
+            fn (PreCssInlineEvent $event) => $callback($event->html, $event->cssInliner, $event),
+        );
 
         return $this;
     }
@@ -582,7 +591,10 @@ class CssInliner
     public function afterConvertingHtml(callable $callback): self
     {
         $this->debug('registered_callback_after_converting_html');
-        Event::listen(PostCssInlineEvent::class, fn (PostCssInlineEvent $event) => $callback($event));
+        Event::listen(
+            PostCssInlineEvent::class,
+            fn (PostCssInlineEvent $event) => $callback($event->html, $event->cssInliner, $event),
+        );
 
         return $this;
     }

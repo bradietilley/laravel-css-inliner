@@ -26,7 +26,7 @@ it('will fire events when converting HTML', function () {
 
     CssInliner::create()
         ->addCssRaw($css)
-        ->beforeConvertingHtml(function (PreCssInlineEvent $event) use ($html, $css, &$callbacks) {
+        ->beforeConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) use ($html, $css, &$callbacks) {
             $callbacks[PreCssInlineEvent::class]++;
 
             /* CSS looks good */
@@ -36,7 +36,7 @@ it('will fire events when converting HTML', function () {
             /* HTML looks good */
             expect($event->html)->sameHtml($html);
         })
-        ->afterConvertingHtml(function (PostCssInlineEvent $event) use ($final, $css, &$callbacks) {
+        ->afterConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PostCssInlineEvent $event) use ($final, $css, &$callbacks) {
             $callbacks[PostCssInlineEvent::class]++;
 
             /* CSS looks good */
@@ -69,7 +69,7 @@ it('will fire events when converting an email', function () {
 
     CssInliner::create()
         ->addCssRaw($css = '.font-bold { font-weight: bold; }')
-        ->beforeConvertingEmail(function (PreEmailCssInlineEvent $event) use ($html, $email, $css, &$callbacks) {
+        ->beforeConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) use ($html, $email, $css, &$callbacks) {
             $callbacks[PreEmailCssInlineEvent::class]++;
 
             /* CSS looks good */
@@ -82,8 +82,7 @@ it('will fire events when converting an email', function () {
             /* Email is same entity */
             expect($event->email)->toBe($email);
         })
-        ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->cssInliner->debug('ran_second_event'))
-        ->beforeConvertingHtml(function (PreCssInlineEvent $event) use ($html, $css, &$callbacks) {
+        ->beforeConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) use ($html, $css, &$callbacks) {
             $callbacks[PreCssInlineEvent::class]++;
 
             /* CSS looks good */
@@ -93,7 +92,7 @@ it('will fire events when converting an email', function () {
             /* HTML looks good */
             expect($event->html)->sameHtml($html);
         })
-        ->afterConvertingHtml(function (PostCssInlineEvent $event) use ($final, $css, &$callbacks) {
+        ->afterConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PostCssInlineEvent $event) use ($final, $css, &$callbacks) {
             $callbacks[PostCssInlineEvent::class]++;
 
             /* CSS looks good */
@@ -103,7 +102,7 @@ it('will fire events when converting an email', function () {
             /* HTML looks good */
             expect($event->html)->sameHtml($final);
         })
-        ->afterConvertingEmail(function (PostEmailCssInlineEvent $event) use ($final, $email, $css, &$callbacks) {
+        ->afterConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PostEmailCssInlineEvent $event) use ($final, $email, $css, &$callbacks) {
             $callbacks[PostEmailCssInlineEvent::class]++;
 
             /* CSS looks good */
@@ -122,8 +121,53 @@ it('will fire events when converting an email', function () {
         ->and($callbacks[PreCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PostCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(1)
-        ->and('email_conversion_finished')->debugLogExists()
-        ->and('ran_second_event')->debugLogExists();
+        ->and('email_conversion_finished')->debugLogExists();
+});
+
+it('will fire events to multiple listeners when converting an email', function () {
+    $email = new Email();
+    $email->html($html = 'Test<span class="font-bold">Test</span>Test');
+
+    $final = 'Test<span class="font-bold" style="font-weight: bold;">Test</span>Test';
+    $callbacks = [
+        PreEmailCssInlineEvent::class => 0,
+        PreCssInlineEvent::class => 0,
+        PostCssInlineEvent::class => 0,
+        PostEmailCssInlineEvent::class => 0,
+    ];
+
+    CssInliner::create()
+        ->beforeConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) use (&$callbacks) {
+            $callbacks[PreEmailCssInlineEvent::class]++;
+        })
+        ->beforeConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) use (&$callbacks) {
+            $callbacks[PreEmailCssInlineEvent::class]++;
+        })
+        ->beforeConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) use (&$callbacks) {
+            $callbacks[PreCssInlineEvent::class]++;
+        })
+        ->beforeConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) use (&$callbacks) {
+            $callbacks[PreCssInlineEvent::class]++;
+        })
+        ->afterConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PostCssInlineEvent $event) use (&$callbacks) {
+            $callbacks[PostCssInlineEvent::class]++;
+        })
+        ->afterConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PostCssInlineEvent $event) use (&$callbacks) {
+            $callbacks[PostCssInlineEvent::class]++;
+        })
+        ->afterConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PostEmailCssInlineEvent $event) use (&$callbacks) {
+            $callbacks[PostEmailCssInlineEvent::class]++;
+        })
+        ->afterConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PostEmailCssInlineEvent $event) use (&$callbacks) {
+            $callbacks[PostEmailCssInlineEvent::class]++;
+        })
+        ->convertEmail($email);
+
+    expect($callbacks[PreEmailCssInlineEvent::class])->toBe(2)
+        ->and($callbacks[PreCssInlineEvent::class])->toBe(2)
+        ->and($callbacks[PostCssInlineEvent::class])->toBe(2)
+        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(2)
+        ->and('email_conversion_finished')->debugLogExists();
 });
 
 it('will allow modification of html during pre and post events', function () {
@@ -132,9 +176,9 @@ it('will allow modification of html during pre and post events', function () {
 
     $expect = 'Test<span class="font-bold" style="font-weight: bold;">Test</span>Test';
     $actual = CssInliner::create()
-        ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->html .= 'something1')
-        ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->cssInliner->debug('ran_second_event'))
-        ->afterConvertingHtml(fn (PostCssInlineEvent $event) => $event->html .= 'something2')
+        ->beforeConvertingHtml(fn (string &$eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventHtml .= 'something1')
+        ->beforeConvertingHtml(fn (string &$eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
+        ->afterConvertingHtml(fn (string &$eventHtml, CssInliner $eventInliner, PostCssInlineEvent $event) => $eventHtml .= 'something2')
         ->addCssRaw($css)
         ->convert($html);
 
@@ -161,8 +205,8 @@ it('will allow halting of html conversion by halting css inliner', function () {
 
     $expect = $html;
     $actual = CssInliner::create()
-        ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->cssInliner->halt())
-        ->beforeConvertingHtml(fn (PreCssInlineEvent $event) => $event->cssInliner->debug('ran_second_event'))
+        ->beforeConvertingHtml(fn (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->halt())
+        ->beforeConvertingHtml(fn (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
         ->addCssRaw($css)
         ->convert($html);
 
@@ -184,8 +228,8 @@ it('will allow halting of email conversion by halting css inliner', function () 
     $expect = $html;
 
     $actual = CssInliner::create()
-        ->beforeConvertingEmail(fn (PreEmailCssInlineEvent $event) => $event->cssInliner->halt())
-        ->beforeConvertingHtml(fn (PreEmailCssInlineEvent $event) => $event->cssInliner->debug('ran_second_event'))
+        ->beforeConvertingEmail(fn (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) => $eventInliner->halt())
+        ->beforeConvertingHtml(fn (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
         ->addCssRaw($css)
         ->convertEmail($email);
 
@@ -208,10 +252,10 @@ it('listens to laravel mail sending event', function () {
 
     $preEmail = null;
     $postEmail = null;
-    CssInline::beforeConvertingEmail(function (PreEmailCssInlineEvent $event) use (&$preEmail) {
+    CssInline::beforeConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) use (&$preEmail) {
         $preEmail = $event->email;
     });
-    CssInline::afterConvertingEmail(function (PostEmailCssInlineEvent $event) use (&$postEmail) {
+    CssInline::afterConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PostEmailCssInlineEvent $event) use (&$postEmail) {
         $postEmail = $event->email;
     });
 
@@ -237,10 +281,10 @@ it('listens to laravel mail sending event but ignores event if disabled', functi
     $postEmail = null;
     CssInline::disableEmailListener();
 
-    CssInline::beforeConvertingEmail(function (PreEmailCssInlineEvent $event) use (&$preEmail) {
+    CssInline::beforeConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) use (&$preEmail) {
         $preEmail = $event->email;
     });
-    CssInline::afterConvertingEmail(function (PostEmailCssInlineEvent $event) use (&$postEmail) {
+    CssInline::afterConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PostEmailCssInlineEvent $event) use (&$postEmail) {
         $postEmail = $event->email;
     });
 
