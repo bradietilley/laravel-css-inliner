@@ -16,7 +16,12 @@ composer require laravel-css-inliner/css-inliner
 
 ## Usage
 
-For the purpose of this demonstration we'll use the facade `LaravelCssInliner\Facades\CssInline`, however if you prefer directly using the instance (like myself) you can swap `LaravelCssInliner\Facades\CssInline::` out for `LaravelCssInliner\CssInliner::singleton()->` in any of the examples below. 
+For the purpose of this demonstration we'll use the facade `LaravelCssInliner\Facades\CssInline`, however if you prefer directly using the instance (like myself) you can swap out `LaravelCssInliner\Facades\CssInline::` for any of the below:
+
+- `LaravelCssInliner\Facades\CssInline::`
+- `LaravelCssInliner\CssInliner::singleton()->`
+- `app(LaravelCssInliner\CssInliner::class)->`
+- `app()->make(LaravelCssInliner\CssInliner::class)->`
 
 #### Adding CSS via PHP
 
