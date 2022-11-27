@@ -176,9 +176,9 @@ it('will allow modification of html during pre and post events', function () {
 
     $expect = 'Test<span class="font-bold" style="font-weight: bold;">Test</span>Test';
     $actual = CssInliner::create()
-        ->beforeConvertingHtml(fn (string &$eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventHtml .= 'something1')
-        ->beforeConvertingHtml(fn (string &$eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
-        ->afterConvertingHtml(fn (string &$eventHtml, CssInliner $eventInliner, PostCssInlineEvent $event) => $eventHtml .= 'something2')
+        ->beforeConvertingHtml(fn (string & $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventHtml .= 'something1')
+        ->beforeConvertingHtml(fn (string & $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
+        ->afterConvertingHtml(fn (string & $eventHtml, CssInliner $eventInliner, PostCssInlineEvent $event) => $eventHtml .= 'something2')
         ->addCssRaw($css)
         ->convert($html);
 
