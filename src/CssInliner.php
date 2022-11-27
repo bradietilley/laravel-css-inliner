@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace LaravelCssInliner;
 
 use Carbon\Carbon;
-use Carbon\Exceptions\UnitException;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use LaravelCssInliner\Events\PostCssInlineEvent;
