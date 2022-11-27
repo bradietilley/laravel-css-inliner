@@ -238,7 +238,7 @@ class CssInliner
     public function disableCssExtractionFromHtmlContent(): self
     {
         $this->debug('disabled_css_extraction_from_html_content');
-        $this->cssFromHtmlContentEnabled = true;
+        $this->cssFromHtmlContentEnabled = false;
 
         return $this;
     }
@@ -446,6 +446,9 @@ class CssInliner
             $this->debug('css_within_html_content_parsed_total_s_characters:'.strlen($htmlCss));
         } else {
             $this->debug('css_within_html_content_ignored');
+
+            $this->stripCssFromHtml($html);
+            $this->debug('css_within_html_content_removed');
         }
 
         $css = collect([
@@ -469,6 +472,21 @@ class CssInliner
         $this->debug('html_size:'.$lengthWas.','.$lengthNow);
 
         return $html;
+    }
+
+    public function stripCssFromHtml(string &$html): void
+    {
+        /* Fetch original CSS Removal option state */
+        $original = $this->cssRemovalFromHtmlContentEnabled();
+
+        /* Temporarily enable CSS Removal option */
+        $this->enableCssRemovalFromHtmlContent();
+
+        /** Parse CSS from HTML (modifies HTML; do nothing with CSS) */
+        $css = $this->parseCssFromHtml($html);
+
+        /* Restore original CSS Removal option state */
+        $this->cssRemovalFromHtmlContentEnabled = $original;
     }
 
     /**
