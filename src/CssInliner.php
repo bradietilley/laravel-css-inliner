@@ -582,6 +582,14 @@ class CssInliner
     }
 
     /**
+     * Get the singleton instance from Laravel's Container
+     */
+    public static function singleton(): self
+    {
+        return app(CssInliner::class); /** @phpstan-ignore-line */
+    }
+
+    /**
      * Get all registered CSS files
      *
      * @return array<string,string>
