@@ -2,4 +2,4 @@
 
 ...
 
-- [ ] I have read the **[CONTRIBUTING](https://github.com/LaravelCssInliner/skeleton-php/blob/main/.github/CONTRIBUTING.md)** document.
+- [ ] I have read the **[CONTRIBUTING](https://github.com/laravel-css-inliner/css-inliner/blob/main/.github/CONTRIBUTING.md)** document.

@@ -2,7 +2,7 @@
 
 Contributions are **welcome** and will be fully **credited**.
 
-We accept contributions via Pull Requests on [Github](https://github.com/LaravelCssInliner/skeleton-php).
+We accept contributions via Pull Requests on [Github](https://github.com/laravel-css-inliner/css-inliner).
 
 ## Pull Requests
 
