@@ -24,7 +24,7 @@ it('will fire events when converting HTML', function () {
         PostEmailCssInlineEvent::class => 0,
     ];
 
-    CssInliner::create()
+    $this->app->make(CssInliner::class)
         ->addCssRaw($css)
         ->beforeConvertingHtml(function (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) use ($html, $css, &$callbacks) {
             $callbacks[PreCssInlineEvent::class]++;
@@ -67,7 +67,7 @@ it('will fire events when converting an email', function () {
         PostEmailCssInlineEvent::class => 0,
     ];
 
-    CssInliner::create()
+    $this->app->make(CssInliner::class)
         ->addCssRaw($css = '.font-bold { font-weight: bold; }')
         ->beforeConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) use ($html, $email, $css, &$callbacks) {
             $callbacks[PreEmailCssInlineEvent::class]++;
@@ -136,7 +136,7 @@ it('will fire events to multiple listeners when converting an email', function (
         PostEmailCssInlineEvent::class => 0,
     ];
 
-    CssInliner::create()
+    $this->app->make(CssInliner::class)
         ->beforeConvertingEmail(function (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) use (&$callbacks) {
             $callbacks[PreEmailCssInlineEvent::class]++;
         })
@@ -175,7 +175,7 @@ it('will allow modification of html during pre and post events', function () {
     $html = 'Test<span class="font-bold">Test</span>Test';
 
     $expect = 'Test<span class="font-bold" style="font-weight: bold;">Test</span>Test';
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->beforeConvertingHtml(fn (string & $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventHtml .= 'something1')
         ->beforeConvertingHtml(fn (string & $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
         ->afterConvertingHtml(fn (string & $eventHtml, CssInliner $eventInliner, PostCssInlineEvent $event) => $eventHtml .= 'something2')
@@ -204,7 +204,7 @@ it('will allow halting of html conversion by halting css inliner', function () {
     $html = 'Test<span class="font-bold">Test</span>Test';
 
     $expect = $html;
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->beforeConvertingHtml(fn (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->halt())
         ->beforeConvertingHtml(fn (string $eventHtml, CssInliner $eventInliner, PreCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
         ->addCssRaw($css)
@@ -227,7 +227,7 @@ it('will allow halting of email conversion by halting css inliner', function () 
 
     $expect = $html;
 
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->beforeConvertingEmail(fn (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) => $eventInliner->halt())
         ->beforeConvertingHtml(fn (Email $eventEmail, CssInliner $eventInliner, PreEmailCssInlineEvent $event) => $eventInliner->debug('ran_second_event'))
         ->addCssRaw($css)
@@ -287,7 +287,7 @@ it('will allow halting of html conversion by halting css inliner but will allow 
         ->and('ran_second_event')->debugLogNotExists()
         ->and('html_conversion_finished')->debugLogNotExists();
 
-    CssInliner::flushDebugLog();
+    CssInline::flushDebugLog();
 
     $html = 'Test<span class="font-bold">Test second</span>Test';
     $expect = 'Test<span class="font-bold" style="font-weight: bold;">Test second</span>Test';

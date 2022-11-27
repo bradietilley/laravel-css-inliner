@@ -10,7 +10,7 @@ it('can convert css classes to inline styles using raw CSS', function () {
 
     $expect = 'This is a <span class="font-bold" style="font-weight: bold;">test</span>';
 
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->addCssRaw($css)
         ->convert($html);
 
@@ -24,7 +24,7 @@ it('can convert css classes to inline styles using CSS file', function () {
     $html = 'This is a <span class="font-bold">test</span>';
     $expect = 'This is a <span class="font-bold" style="font-weight: bold;">test</span>';
 
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->addCssPath($file)
         ->convert($html);
 
@@ -37,7 +37,7 @@ it('can convert css classes to inline styles using embedded style element', func
 
     $expect = 'This is a <span class="example" style="text-decoration: underline;">test</span>';
 
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->enableCssExtractionFromHtmlContent()
         ->disableCssRemovalFromHtmlContent()
         ->convert($html);
@@ -52,7 +52,7 @@ it('can convert css classes to inline styles using embedded link element as loca
 
     $expect = 'This is a <span class="example" style="font-style: italic;">test</span>';
 
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->enableCssExtractionFromHtmlContent()
         ->disableCssRemovalFromHtmlContent()
         ->convert($html);
@@ -71,7 +71,7 @@ it('can convert css classes to inline styles using multiple sources', function (
 
     $expect = 'This is a <span class="example" style="font-weight: bold; font-size: 12px; color: red; text-decoration: underline;">test</span>';
 
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->addCssPath($file1)
         ->addCssPath($file2)
         ->addCssRaw($css1)
@@ -114,7 +114,7 @@ it('can convert css classes to inline styles and remove style and link elements 
     /**
      * Enabled
      */
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->enableCssExtractionFromHtmlContent()
         ->enableCssRemovalFromHtmlContent()
         ->convert($html);
@@ -130,7 +130,7 @@ it('can convert css classes to inline styles and remove style and link elements 
     /**
      * Disabled
      */
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->enableCssExtractionFromHtmlContent()
         ->disableCssRemovalFromHtmlContent()
         ->convert($html);
@@ -177,7 +177,7 @@ it('will not parse css style and link elements from html if disabled', function 
     /**
      * Enabled
      */
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->enableCssExtractionFromHtmlContent()
         ->disableCssRemovalFromHtmlContent()
         ->convert($html);
@@ -188,7 +188,7 @@ it('will not parse css style and link elements from html if disabled', function 
     /**
      * Disabled
      */
-    $actual = CssInliner::create()
+    $actual = $this->app->make(CssInliner::class)
         ->disableCssExtractionFromHtmlContent()
         ->disableCssRemovalFromHtmlContent()
         ->convert($html);

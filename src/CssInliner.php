@@ -42,23 +42,10 @@ class CssInliner
     protected array $interceptCssFiles = [];
 
     /** Is debug mode enabled? */
-    protected static bool $debug = false;
+    protected bool $debug = false;
 
     /** @var array<string> Debug logs */
-    protected static array $log = [];
-
-    /**
-     * Create a new CssInliner instance
-     *
-     * For Laravel: it's recommended you use the facade
-     * or at least `app(CssInliner::class)` to ensure that
-     * you're also referencing a singleton not a stray
-     * instance
-     */
-    public static function create(): self
-    {
-        return new self();
-    }
+    protected array $log = [];
 
     public function __construct()
     {
@@ -68,25 +55,25 @@ class CssInliner
     /**
      * Enable debug mode
      */
-    public static function enableDebug(): void
+    public function enableDebug(): void
     {
-        static::$debug = true;
+        $this->debug = true;
     }
 
     /**
      * Disable debug mode
      */
-    public static function disableDebug(): void
+    public function disableDebug(): void
     {
-        static::$debug = false;
+        $this->debug = false;
     }
 
     /**
      * Reset the log
      */
-    public static function flushDebugLog(): void
+    public function flushDebugLog(): void
     {
-        static::$log = [];
+        $this->log = [];
     }
 
     /**
@@ -94,9 +81,9 @@ class CssInliner
      *
      * @return array<string>
      */
-    public static function getDebugLog(): array
+    public function getDebugLog(): array
     {
-        return static::$log;
+        return $this->log;
     }
 
     /**
@@ -104,7 +91,7 @@ class CssInliner
      */
     public function debug(string $message): self
     {
-        if (static::$debug) {
+        if ($this->debug) {
             $log = sprintf(
                 '[%s]: %s | %s',
                 Carbon::now()->toDateTimeString(),
@@ -112,7 +99,7 @@ class CssInliner
                 $message,
             );
 
-            static::$log[] = $log;
+            $this->log[] = $log;
         }
 
         return $this;
