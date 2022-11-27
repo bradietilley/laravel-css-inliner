@@ -20,7 +20,7 @@ For the purpose of this demsonstration we'll use the facade `LaravelCssInliner\F
 
 #### Adding CSS via PHP
 
-You can at any point (before HTML conversion) define your all CSS files or raw CSS that you wish to add to every bit of HTML or email that is converted by CSS Inliner. A good example of this is a base stylesheet that all emails should inherit.
+You can at any point (before HTML conversion) define your CSS files or raw CSS that you wish to add to every HTML string or email that is converted by the CSS Inliner. A good example of this is a base stylesheet that all emails should inherit.
 
 ```php
 use LaravelCssInliner\Facades\CssInline;
