@@ -1,7 +1,7 @@
 {
     "name": "laravel-css-inliner/css-inliner",
     "type": "library",
-    "description": ":package_description",
+    "description": "Converts CSS classes to inline styles within Laravel email",
     "license": "MIT",
     "require": {
         "php": "^8.1",
