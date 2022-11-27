@@ -386,7 +386,7 @@ class CssInliner
 
         Event::dispatch(new PreEmailCssInlineEvent($email, $this));
 
-        if ($this->process === false) {
+        if ($this->process === false) { /** @phpstan-ignore-line */
             $this->debug('email_processing_has_been_halted_skipping_conversion');
 
             return $email;
