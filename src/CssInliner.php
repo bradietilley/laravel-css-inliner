@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace LaravelCssInliner;
 
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
 use LaravelCssInliner\Events\PostCssInlineEvent;
 use LaravelCssInliner\Events\PostEmailCssInlineEvent;
 use LaravelCssInliner\Events\PreCssInlineEvent;
 use LaravelCssInliner\Events\PreEmailCssInlineEvent;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use SplFileInfo;
 use Symfony\Component\Mime\Email;
 use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
@@ -18,7 +19,7 @@ use TijsVerkoyen\CssToInlineStyles\CssToInlineStyles;
 class CssInliner
 {
     /** Unique instance ID */
-    protected string $instance;
+    public readonly string $instanceId;
 
     /** @var array<string,string> CSS files to add to HTML that is converted by CssInliner */
     protected array $cssFiles = [];
@@ -41,66 +42,20 @@ class CssInliner
     /** @var array<string,callable> Callback interceptors for reading CSS files */
     protected array $interceptCssFiles = [];
 
-    /** Is debug mode enabled? */
-    protected bool $debug = false;
+    protected readonly LoggerInterface $logger;
 
-    /** @var array<string> Debug logs */
-    protected array $log = [];
-
-    public function __construct()
+    public function __construct(LoggerInterface $logger = null)
     {
-        $this->instance = (string) Str::uuid();
+        $this->instanceId = (string) Str::uuid();
+        $this->logger = $logger ?? new NullLogger();
     }
 
-    /**
-     * Enable debug mode
-     */
-    public function enableDebug(): void
-    {
-        $this->debug = true;
-    }
-
-    /**
-     * Disable debug mode
-     */
-    public function disableDebug(): void
-    {
-        $this->debug = false;
-    }
-
-    /**
-     * Reset the log
-     */
-    public function flushDebugLog(): void
-    {
-        $this->log = [];
-    }
-
-    /**
-     * Get the debug log
-     *
-     * @return array<string>
-     */
-    public function getDebugLog(): array
-    {
-        return $this->log;
-    }
-
-    /**
-     * Log some debug information for when debug mode is enabled
-     */
     public function debug(string $message): self
     {
-        if ($this->debug) {
-            $log = sprintf(
-                '[%s]: %s | %s',
-                Carbon::now()->toDateTimeString(),
-                $this->instance,
-                $message,
-            );
-
-            $this->log[] = $log;
-        }
+        $this->logger->debug(
+            $message,
+            ['instance' => $this->instanceId]
+        );
 
         return $this;
     }
@@ -372,7 +327,8 @@ class CssInliner
 
         Event::dispatch(new PreEmailCssInlineEvent($email, $this));
 
-        if ($this->process === false) { /** @phpstan-ignore-line */
+        /** @phpstan-ignore-next-line */
+        if ($this->process === false) {
             $this->debug('email_processing_has_been_halted_skipping_conversion');
 
             return $email;
