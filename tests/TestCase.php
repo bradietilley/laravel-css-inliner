@@ -32,9 +32,9 @@ class TestCase extends \Orchestra\Testbench\TestCase
     {
         parent::tearDown();
 
-        foreach (scandir(__DIR__.'/temp') as $file) {
+        foreach (scandir(__DIR__.'/.temp') as $file) {
             if ($file[0] !== '.') {
-                unlink(__DIR__.'/temp/'.$file);
+                unlink(__DIR__.'/.temp/'.$file);
             }
         }
     }
