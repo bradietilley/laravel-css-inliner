@@ -51,8 +51,12 @@ it('will fire events when converting HTML', function () {
     expect($callbacks[PreEmailCssInlineEvent::class])->toBe(0)
         ->and($callbacks[PreCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PostCssInlineEvent::class])->toBe(1)
-        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(0)
-        ->and('html_conversion_finished')->debugLogExists();
+        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(0);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'html_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
 
 it('will fire events when converting an email', function () {
@@ -120,8 +124,12 @@ it('will fire events when converting an email', function () {
     expect($callbacks[PreEmailCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PreCssInlineEvent::class])->toBe(1)
         ->and($callbacks[PostCssInlineEvent::class])->toBe(1)
-        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(1)
-        ->and('email_conversion_finished')->debugLogExists();
+        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(1);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'email_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
 
 it('will fire events to multiple listeners when converting an email', function () {
@@ -166,8 +174,12 @@ it('will fire events to multiple listeners when converting an email', function (
     expect($callbacks[PreEmailCssInlineEvent::class])->toBe(2)
         ->and($callbacks[PreCssInlineEvent::class])->toBe(2)
         ->and($callbacks[PostCssInlineEvent::class])->toBe(2)
-        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(2)
-        ->and('email_conversion_finished')->debugLogExists();
+        ->and($callbacks[PostEmailCssInlineEvent::class])->toBe(2);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'email_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
 
 it('will allow modification of html during pre and post events', function () {
@@ -194,9 +206,17 @@ it('will allow modification of html during pre and post events', function () {
         subject: $actual,
     );
 
-    expect($actual)->sameHtml($expect)
-        ->and('html_conversion_finished')->debugLogExists()
-        ->and('ran_second_event')->debugLogExists();
+    expect($actual)->sameHtml($expect);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'html_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'ran_second_event',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
 
 it('will allow halting of html conversion by halting css inliner', function () {
@@ -211,11 +231,27 @@ it('will allow halting of html conversion by halting css inliner', function () {
         ->convert($html);
 
     // No change
-    expect($actual)->sameHtml($expect)
-        ->and('html_processing_has_been_halted_skipping_conversion')->debugLogExists()
-        ->and('email_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
-        ->and('ran_second_event')->debugLogNotExists()
-        ->and('email_conversion_finished')->debugLogNotExists();
+    expect($actual)->sameHtml($expect);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'html_processing_has_been_halted_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'email_processing_has_been_halted_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'ran_second_event',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'email_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
 
 it('will allow halting of email conversion by halting css inliner', function () {
@@ -234,11 +270,27 @@ it('will allow halting of email conversion by halting css inliner', function () 
         ->convertEmail($email);
 
     // No change
-    expect($actual->getHtmlBody())->sameHtml($expect)
-        ->and('email_processing_has_been_halted_skipping_conversion')->debugLogExists()
-        ->and('html_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
-        ->and('ran_second_event')->debugLogNotExists()
-        ->and('email_conversion_finished')->debugLogNotExists();
+    expect($actual->getHtmlBody())->sameHtml($expect);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'email_processing_has_been_halted_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'html_processing_has_been_halted_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'ran_second_event',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'email_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
 
 it('listens to laravel mail sending event', function () {
@@ -263,9 +315,17 @@ it('listens to laravel mail sending event', function () {
 
     expect($preEmail)->toBe($email)
         ->and($postEmail)->toBe($email)
-        ->and($email->getHtmlBody())->sameHtml($expect)
-        ->and('email_listener_is_disabled_skipping_conversion')->debugLogNotExists()
-        ->and('email_conversion_finished')->debugLogExists();
+        ->and($email->getHtmlBody())->sameHtml($expect);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'email_listener_is_disabled_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'email_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
 
 it('will allow halting of html conversion by halting css inliner but will allow subsequent conversions', function () {
@@ -281,13 +341,27 @@ it('will allow halting of html conversion by halting css inliner but will allow 
         ->convert($html);
 
     // No change
-    expect($actual)->sameHtml($expect)
-        ->and('html_processing_has_been_halted_skipping_conversion')->debugLogExists()
-        ->and('email_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
-        ->and('ran_second_event')->debugLogNotExists()
-        ->and('html_conversion_finished')->debugLogNotExists();
+    expect($actual)->sameHtml($expect);
 
-    CssInline::flushDebugLog();
+    $this->logger->shouldHaveReceived('debug', [
+        'html_processing_has_been_halted_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'email_processing_has_been_halted_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'ran_second_event',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'html_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 
     $html = 'Test<span class="font-bold">Test second</span>Test';
     $expect = 'Test<span class="font-bold" style="font-weight: bold;">Test second</span>Test';
@@ -297,9 +371,17 @@ it('will allow halting of html conversion by halting css inliner but will allow 
         ->convert($html);
 
     // No change
-    expect($actual)->sameHtml($expect)
-        ->and('html_processing_has_been_halted_skipping_conversion')->debugLogNotExists()
-        ->and('html_conversion_finished')->debugLogExists();
+    expect($actual)->sameHtml($expect);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'html_processing_has_been_halted_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldHaveReceived('debug', [
+        'html_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
 
 it('listens to laravel mail sending event but ignores event if disabled', function () {
@@ -328,6 +410,13 @@ it('listens to laravel mail sending event but ignores event if disabled', functi
         ->and($postEmail)->toBeNull()
         ->and($email->getHtmlBody())->sameHtml($expect);
 
-    expect('email_listener_is_disabled_skipping_conversion')->debugLogExists()
-        ->and('email_conversion_finished')->debugLogNotExists();
+    $this->logger->shouldHaveReceived('debug', [
+        'email_listener_is_disabled_skipping_conversion',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
+
+    $this->logger->shouldNotHaveReceived('debug', [
+        'email_conversion_finished',
+        ['instance' => $this->app->make(CssInliner::class)->instanceId],
+    ]);
 });
