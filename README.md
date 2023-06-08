@@ -1,7 +1,7 @@
 # CSS Style Inliner for Laravel
 
-![Static Analysis](https://github.com/bradietilley/css-inliner/actions/workflows/static.yml/badge.svg)
-![Tests](https://github.com/bradietilley/css-inliner/actions/workflows/tests.yml/badge.svg)
+![Static Analysis](https://github.com/bradietilley/laravel-css-inliner/actions/workflows/static.yml/badge.svg)
+![Tests](https://github.com/bradietilley/laravel-css-inliner/actions/workflows/tests.yml/badge.svg)
 
 ## Overview
 
