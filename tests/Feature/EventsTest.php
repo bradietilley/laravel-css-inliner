@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
-use LaravelCssInliner\CssInliner;
-use LaravelCssInliner\Events\PostCssInlineEvent;
-use LaravelCssInliner\Events\PostEmailCssInlineEvent;
-use LaravelCssInliner\Events\PreCssInlineEvent;
-use LaravelCssInliner\Events\PreEmailCssInlineEvent;
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\CssInliner;
+use BradieTilley\LaravelCssInliner\Events\PostCssInlineEvent;
+use BradieTilley\LaravelCssInliner\Events\PostEmailCssInlineEvent;
+use BradieTilley\LaravelCssInliner\Events\PreCssInlineEvent;
+use BradieTilley\LaravelCssInliner\Events\PreEmailCssInlineEvent;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 use Symfony\Component\Mime\Email;
 
 it('will fire events when converting HTML', function () {

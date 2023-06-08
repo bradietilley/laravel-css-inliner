@@ -1,8 +1,8 @@
 <?php
 
-namespace LaravelCssInliner\Events;
+namespace BradieTilley\LaravelCssInliner\Events;
 
-use LaravelCssInliner\CssInliner;
+use BradieTilley\LaravelCssInliner\CssInliner;
 use Symfony\Component\Mime\Email;
 
 /**

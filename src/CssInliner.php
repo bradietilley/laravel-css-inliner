@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace LaravelCssInliner;
+namespace BradieTilley\LaravelCssInliner;
 
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
-use LaravelCssInliner\Events\PostCssInlineEvent;
-use LaravelCssInliner\Events\PostEmailCssInlineEvent;
-use LaravelCssInliner\Events\PreCssInlineEvent;
-use LaravelCssInliner\Events\PreEmailCssInlineEvent;
+use BradieTilley\LaravelCssInliner\Events\PostCssInlineEvent;
+use BradieTilley\LaravelCssInliner\Events\PostEmailCssInlineEvent;
+use BradieTilley\LaravelCssInliner\Events\PreCssInlineEvent;
+use BradieTilley\LaravelCssInliner\Events\PreEmailCssInlineEvent;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use SplFileInfo;

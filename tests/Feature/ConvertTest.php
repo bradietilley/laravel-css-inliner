@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use LaravelCssInliner\CssInliner;
+use BradieTilley\LaravelCssInliner\CssInliner;
 
 it('can convert css classes to inline styles using raw CSS', function () {
     $html = 'This is a <span class="font-bold">test</span>';

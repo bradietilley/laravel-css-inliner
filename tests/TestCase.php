@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace LaravelCssInliner\Tests;
+namespace BradieTilley\LaravelCssInliner\Tests;
 
-use LaravelCssInliner\LaravelCssInlinerServiceProvider;
+use BradieTilley\LaravelCssInliner\LaravelCssInlinerServiceProvider;
 use Mockery;
 use Mockery\MockInterface;
 use Monolog\Logger;

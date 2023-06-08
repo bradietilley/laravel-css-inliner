@@ -1,5 +1,8 @@
 # CSS Style Inliner for Laravel
 
+![Static Analysis](https://github.com/bradietilley/css-inliner/actions/workflows/static.yml/badge.svg)
+![Tests](https://github.com/bradietilley/css-inliner/actions/workflows/tests.yml/badge.svg)
+
 ## Overview
 
 This package leverages `tijsverkoyen/css-to-inline-styles` to convert CSS classes in mailable views to inline styles, for improved email client compatibility.
@@ -11,24 +14,24 @@ You can either leverage the automation of this package, or opt to hook into this
 Via Composer
 
 ```shell
-composer require laravel-css-inliner/css-inliner
+composer require bradietilley/laravel-css-inliner
 ```
 
 ## Usage
 
-For the purpose of this demonstration we'll use the facade `LaravelCssInliner\Facades\CssInline`, however if you prefer directly using the instance (like myself) you can swap out `LaravelCssInliner\Facades\CssInline::` for any of the below:
+For the purpose of this demonstration we'll use the facade `BradieTilley\LaravelCssInliner\Facades\CssInline`, however if you prefer directly using the instance (like myself) you can swap out `BradieTilley\LaravelCssInliner\Facades\CssInline::` for any of the below:
 
-- `LaravelCssInliner\Facades\CssInline::`
-- `LaravelCssInliner\CssInliner::singleton()->`
-- `app(LaravelCssInliner\CssInliner::class)->`
-- `app()->make(LaravelCssInliner\CssInliner::class)->`
+- `BradieTilley\LaravelCssInliner\Facades\CssInline::`
+- `BradieTilley\LaravelCssInliner\CssInliner::singleton()->`
+- `app(BradieTilley\LaravelCssInliner\CssInliner::class)->`
+- `app()->make(BradieTilley\LaravelCssInliner\CssInliner::class)->`
 
 #### Adding CSS via PHP
 
 You can at any point (before HTML conversion) define your CSS files or raw CSS that you wish to add to every HTML string or email that is converted by the CSS Inliner. A good example of this is a base stylesheet that all emails should inherit.
 
 ```php
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 
 CssInline::addCssPath(resource_path('css/email.css'));
 CssInline::addCssRaw('body { background: #eee; }');
@@ -43,7 +46,7 @@ CssInline::addCss('body { background: #eee; }');
 You may wish to manually convert some CSS in an HTML string or Email.
 
 ```php
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 use Symfony\Component\Mime\Email;
 
 CssInline::addCss('.font-bold { font-weight: bold; }');
@@ -64,7 +67,7 @@ echo $email->getHtmlBody(); // <html><body><div class="font-bold" style="font-we
 You may wish to conditionally enable or disable the CSS Inliner for mail sent from Laravel (via `Mail::send()`). To do this, we can leverage the `emailListener` option. Default is `true` (and as such will automatically convert CSS classes found in your emails sent from Laravel).
 
 ```php
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 
 CssInline::emailListenerEnabled(); // Current state: true or false
 CssInline::enableEmailListener(); // Enables option; returns instance of CssInliner
@@ -76,7 +79,7 @@ CssInline::disableEmailListener(); // Disables option; returns instance of CssIn
 You may wish to parse `<style>` or `<link>` stylesheets that are found within the HTML or email, for example if you want to store email-specific CSS within the email view itself. To do this, we can leverage the `cssFromHtmlContent` option. Default is `false`.
 
 ```php
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 
 CssInline::cssFromHtmlContentEnabled(); // Current state: true or false
 CssInline::enableCssExtractionFromHtmlContent(); // Enables option; returns instance of CssInliner
@@ -88,7 +91,7 @@ CssInline::disableCssExtractionFromHtmlContent(); // Disables option; returns in
 You may wish to strip out the large `<style>` or `<link>` stylesheets after this package converts the CSS to inline styles, to reduce the payload size of emails sent out from your system. To do this, we can leverage the `cssRemovalFromHtmlContent` option. Default is `false`.
 
 ```php
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 
 CssInline::cssRemovalFromHtmlContentEnabled(); // Current state: true or false
 CssInline::enableCssRemovalFromHtmlContent(); // Enables option; returns instance of CssInliner
@@ -96,7 +99,7 @@ CssInline::disableCssRemovalFromHtmlContent(); // Disables option; returns insta
 ```
 
 ```php
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 
 CssInline::doSomething();
 CssInliner::addCssPath(resource_path('css/email.css'));
@@ -113,15 +116,15 @@ echo $html; // <span class="text-success" style="color: #00ff00;">Success text</
 
 There are four events fired by CssInliner - two for HTML conversion, and all four for Email conversion. The order of which the events are called is:
 
-- 1st: `LaravelCssInliner\Events\PreEmailCssInlineEvent` (Email only)
-- 2nd: `LaravelCssInliner\Events\PreCssInlineEvent` (Email + HTML)
-- 3rd: `LaravelCssInliner\Events\PostCssInlineEvent` (Email + HTML)
-- 4th: `LaravelCssInliner\Events\PostEmailCssInlineEvent` (Email only)
+- 1st: `BradieTilley\LaravelCssInliner\Events\PreEmailCssInlineEvent` (Email only)
+- 2nd: `BradieTilley\LaravelCssInliner\Events\PreCssInlineEvent` (Email + HTML)
+- 3rd: `BradieTilley\LaravelCssInliner\Events\PostCssInlineEvent` (Email + HTML)
+- 4th: `BradieTilley\LaravelCssInliner\Events\PostEmailCssInlineEvent` (Email only)
 
 Listening to events can be done through Laravel's normal means. For example:
 
 ```php
-Event::listen(\LaravelCssInliner\Events\PreEmailCssInlineEvent::class, fn () => doSomething());
+Event::listen(\BradieTilley\LaravelCssInliner\Events\PreEmailCssInlineEvent::class, fn () => doSomething());
 ```
 
 Or, you may wish to hook into CSS Inliner using the callback methods: `beforeConvertingEmail`, `afterConvertingEmail`, `beforeConvertingHtml`, `afterConvertingHtml`. These methods accept a callback and are simply a proxy to `Event::listen()` so feel free to treat the callbacks used in the examples below as the second argument to `Event::listen()` of the corresponding CssInliner events. 
@@ -132,7 +135,7 @@ Or, you may wish to hook into CSS Inliner using the callback methods: `beforeCon
 CssInliner::beforeConvertingEmail(function (PreEmailCssInlineEvent $event) {
     # You have access to the unconverted-Email and CSS Inliner instance via the event
     $event->email; // instanceof: \Symfony\Component\Mime\Email
-    $event->cssInliner; // instanceof LaravelCssInliner\CssInliner
+    $event->cssInliner; // instanceof BradieTilley\LaravelCssInliner\CssInliner
     echo $event->email->getHtmlBody(); // <html>...</html>
 
     # Because this is a 'before' event, you may choose to halt the conversion of this *one* Email
@@ -147,7 +150,7 @@ CssInliner::beforeConvertingEmail(function (PreEmailCssInlineEvent $event) {
 CssInliner::beforeConvertingHtml(function (PreCssInlineEvent $event) {
     # You have access to the unconverted-HTML and CSS Inliner instance via the event
     $event->html; // string
-    $event->cssInliner; // instanceof LaravelCssInliner\CssInliner
+    $event->cssInliner; // instanceof BradieTilley\LaravelCssInliner\CssInliner
     echo $event->html; // <html>...</html>
 
     # Because this is a 'before' event, you may choose to halt the conversion of this *one* HTML string
@@ -162,7 +165,7 @@ CssInliner::beforeConvertingHtml(function (PreCssInlineEvent $event) {
 CssInliner::afterConvertingHtml(function (PostCssInlineEvent $event) {
     # You have access to the converted-HTML and CSS Inliner instance via the event
     $event->html; // string
-    $event->cssInliner; // instanceof LaravelCssInliner\CssInliner
+    $event->cssInliner; // instanceof BradieTilley\LaravelCssInliner\CssInliner
     echo $event->html; // <html>...</html>
 
     # Because this is an 'after' event, you cannot halt the conversion of the HTML string (unlike the 'before' event)
@@ -175,7 +178,7 @@ CssInliner::afterConvertingHtml(function (PostCssInlineEvent $event) {
 CssInliner::afterConvertingEmail(function (PostEmailCssInlineEvent $event) {
     # You have access to the converted-Email and CSS Inliner instance via the event
     $event->email; // instanceof: \Symfony\Component\Mime\Email
-    $event->cssInliner; // instanceof LaravelCssInliner\CssInliner
+    $event->cssInliner; // instanceof BradieTilley\LaravelCssInliner\CssInliner
     echo $event->email->getHtmlBody(); // <html>...</html>
 
     # Because this is an 'after' event, you cannot halt the conversion of the Email (unlike the 'before' event)

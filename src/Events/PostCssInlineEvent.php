@@ -1,8 +1,8 @@
 <?php
 
-namespace LaravelCssInliner\Events;
+namespace BradieTilley\LaravelCssInliner\Events;
 
-use LaravelCssInliner\CssInliner;
+use BradieTilley\LaravelCssInliner\CssInliner;
 
 /**
  * Event is fired after an HTML string is converted from CSS to inline styles.

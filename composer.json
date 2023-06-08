@@ -1,5 +1,5 @@
 {
-    "name": "laravel-css-inliner/css-inliner",
+    "name": "bradietilley/laravel-css-inliner",
     "type": "library",
     "description": "Converts CSS classes to inline styles within Laravel email",
     "license": "MIT",
@@ -19,12 +19,12 @@
     },
     "autoload": {
         "psr-4": {
-            "LaravelCssInliner\\": "src/"
+            "BradieTilley\\LaravelCssInliner\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "LaravelCssInliner\\Tests\\": "tests/"
+            "BradieTilley\\LaravelCssInliner\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -41,10 +41,10 @@
     "extra": {
         "laravel": {
             "providers": [
-                "LaravelCssInliner\\LaravelCssInlinerServiceProvider"
+                "BradieTilley\\LaravelCssInliner\\LaravelCssInlinerServiceProvider"
             ],
             "aliases": {
-                "CssInline": "LaravelCssInliner\\Facades\\CssInline"
+                "CssInline": "BradieTilley\\LaravelCssInliner\\Facades\\CssInline"
             }
         }
     },

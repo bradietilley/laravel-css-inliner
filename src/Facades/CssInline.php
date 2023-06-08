@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace LaravelCssInliner\Facades;
+namespace BradieTilley\LaravelCssInliner\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use LaravelCssInliner\CssInliner;
+use BradieTilley\LaravelCssInliner\CssInliner;
 use Symfony\Component\Mime\Email;
 
 /**

@@ -1,6 +1,6 @@
 <?php
 
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 
 it('can add raw css to the instance', function () {
     $styles1 = '.font-bold { font-weight: bold; }';

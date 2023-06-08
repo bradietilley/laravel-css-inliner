@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace LaravelCssInliner;
+namespace BradieTilley\LaravelCssInliner;
 
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
-use LaravelCssInliner\Facades\CssInline;
+use BradieTilley\LaravelCssInliner\Facades\CssInline;
 
 class LaravelCssInlinerServiceProvider extends ServiceProvider
 {

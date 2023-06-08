@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use LaravelCssInliner\Tests\TestCase;
+use BradieTilley\LaravelCssInliner\Tests\TestCase;
 
 uses(TestCase::class)->in('Feature');
 
